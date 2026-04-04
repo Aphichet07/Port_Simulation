@@ -14,7 +14,7 @@ bun run index.ts
 
 This project was created using `bun init` in bun v1.3.11. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
 
-
+```
 server/
 ├── bun.lockb                  # ไฟล์จัดการเวอร์ชันของ Package (สร้างโดย Bun)
 ├── package.json
@@ -70,3 +70,4 @@ server/
             ├── index.ts       # Route: POST /ai/ask, GET /ai/sentiment
             ├── service.ts     # Logic: ส่งข้อมูลหา LLM
             └── rag.ts         # Logic: ค้นหาข่าวที่เกี่ยวข้อง (Vector Search)
+```

@@ -1,25 +1,14 @@
-import { Elysia } from 'elysia'
-import { cors } from '@elysiajs/cors'
-import { testController } from './modules/test/test.controller'
-
-import { financeModule } from './modules/finance/finance.controller';
+import { Elysia } from "elysia";
+import { cors } from "@elysiajs/cors";
+import { setup } from "./setup";
+import { AuthModule } from "./modules/auth";
 
 const app = new Elysia()
-    .onError(({ code, error, set }) => {
-        if (code === 'NOT_FOUND') {
-            set.status = 404
-            return { status: 'error', message: error.message }
-        }
-        
-        return { status: 'internal_error', message: 'Something went wrong' }
+    .use(setup)
+    .use(AuthModule)
+    .get('/', () => { 
+        return "Quant Terminal API is online!"; 
     })
-    .use(financeModule)
-    .listen(3001)
+    .listen(process.env.PORT || 8000); 
 
-export type App = typeof app;
-
-
-
-// ลอง bun run dev
-// แล้ว curl ใน terminal
-// curl http://localhost:3001/finance/price/bitcoin
+console.log(`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`);

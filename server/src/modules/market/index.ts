@@ -1,0 +1,65 @@
+import { Elysia, t } from "elysia";
+import { MarketService } from "./service";
+
+export const MarketModule = new Elysia({ prefix: "/market" })
+  .get("/:symbol", async ({ params, set }) => {
+    const symbol = params.symbol;
+
+    const data = await MarketService.getLivePrice(symbol);
+
+    if (!data) {
+      set.status = 404;
+      return { success: false, error: "ไม่พบข้อมูลหุ้นสัญลักษณ์นี้" };
+    }
+
+    return { success: true, data: data };
+  })
+
+  .ws("/live", {
+    body: t.Object({
+      action: t.String(), // 'subscribe' หรือ 'unsubscribe'
+      symbol: t.String(), // 'AAPL', 'TSLA'
+    }),
+
+    open(ws) {
+      console.log("Client connected to Market WebSocket");
+    },
+
+    message(ws, message) {
+      if (message.action === "subscribe") {
+        const symbol = message.symbol;
+        console.log(`User subscribed to: ${symbol}`);
+
+        MarketService.getLivePrice(symbol).then((data) => {
+          if (data) ws.send({ type: "PRICE_UPDATE", data });
+        });
+
+        const intervalId = setInterval(async () => {
+          const data = await MarketService.getLivePrice(symbol);
+          if (data) {
+            ws.send({ type: "PRICE_UPDATE", data });
+          }
+        }, 10000);
+
+        ws.data = { ...ws.data, [`interval_${symbol}`]: intervalId };
+      }
+
+      if (message.action === "unsubscribe") {
+        const symbol = message.symbol;
+        const intervalId = (ws.data as any)[`interval_${symbol}`];
+        if (intervalId) {
+          clearInterval(intervalId); 
+          console.log(`User unsubscribed from: ${symbol}`);
+        }
+      }
+    },
+
+    close(ws) {
+      console.log("Client disconnected");
+      for (const key in ws.data) {
+        if (key.startsWith("interval_")) {
+          clearInterval((ws.data as any)[key]);
+        }
+      }
+    },
+  });

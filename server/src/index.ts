@@ -2,10 +2,12 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { setup } from "./setup";
 import { AuthModule } from "./modules/auth";
+import { MarketModule } from "./modules/market";
 
 const app = new Elysia()
     .use(setup)
     .use(AuthModule)
+    .use(MarketModule)
     .get('/', () => { 
         return "Quant Terminal API is online!"; 
     })

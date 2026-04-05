@@ -1,9 +1,10 @@
-import { pgTable, serial, text, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, integer, timestamp } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
-  id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  password: text('password').notNull(),
-  balance: numeric('balance', { precision: 15, scale: 2 }).default('100000.00'),
+  id: uuid('id').primaryKey().defaultRandom(),
+  username: varchar('username', { length: 50 }).notNull(),
+  email: varchar('email', { length: 100 }).notNull().unique(),
+  password_hash: text('password_hash').notNull(),
+  risk_tolerance: integer('risk_tolerance').notNull(),
+  created_at: timestamp('created_at').notNull().defaultNow(),
 });

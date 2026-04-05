@@ -1,13 +1,19 @@
 import { db } from "../../db";
-import {users} from "../../db/schema/users"
+import { users } from "../../db/schema/users";
 import { eq } from "drizzle-orm";
+import { sendActivationEmail } from "../../services/email";
+import { googleAuth } from "../../services/oauth"
 
 export const AuthService = {
-    async registerUser(data: any) {
+  async registerUser(data: any) {
     // เช็คว่ามี Email นี้ในระบบหรือยัง
-    const existingUser = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    const existingUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, data.email))
+      .limit(1);
     if (existingUser.length > 0) {
-      throw new Error('Email นี้ถูกใช้งานแล้ว');
+      throw new Error("Email นี้ถูกใช้งานแล้ว");
     }
 
     // Hash รหัสผ่าน
@@ -16,32 +22,112 @@ export const AuthService = {
       cost: 10,
     });
 
-    // บันทึกลง Database 
-    const [newUser] = await db.insert(users).values({
-      name: data.name,
-      email: data.email,
-      password: hashedPassword,
-      balance: '100000.00' 
-    }).returning({ id: users.id, name: users.name, email: users.email });
+    //  Token
+    const token = crypto.randomUUID();
+
+    // บันทึกลง Database
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+        balance: "100000.00",
+        activationToken: token,
+        isActivated: false,
+      })
+      .returning({ id: users.id, name: users.name, email: users.email });
+
+    try {
+      await sendActivationEmail(data.email, token);
+    } catch (error) {
+      console.error("ส่งอีเมลล้มเหลว:", error);
+    }
 
     return newUser;
+  },
+
+  async activateUser(token: string) {
+    if (!token) {
+      throw new Error("ไม่พบ Token สำหรับยืนยันตัวตน");
+    }
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.activationToken, token))
+      .limit(1);
+
+    if (!user) {
+      throw new Error("ลิงก์ยืนยันไม่ถูกต้อง หรือหมดอายุแล้ว");
+    }
+
+    await db
+      .update(users)
+      .set({
+        isActivated: true,
+        activationToken: null,
+      })
+      .where(eq(users.id, user.id));
+
+    return user;
   },
 
   // ฟังก์ชันตรวจสอบการเข้าสู่ระบบ
   async verifyLogin(data: any) {
     // หา User จาก Email
-    const [user] = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
-    
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, data.email))
+      .limit(1);
+
     if (!user) {
-      throw new Error('ไม่พบข้อมูลผู้ใช้');
+      throw new Error("ไม่พบข้อมูลผู้ใช้");
     }
 
-    const isMatch = await Bun.password.verify(data.password, user.password);
-    
+    const isMatch = await Bun.password.verify(data.password, user.password!);
+
     if (!isMatch) {
-      throw new Error('รหัสผ่านไม่ถูกต้อง');
+      throw new Error("รหัสผ่านไม่ถูกต้อง");
     }
 
     return user;
+  },
+  
+  async loginWithGoogle(code: string, storedCodeVerifier: string) {
+    // 1. เอา Code ไปแลกเป็น Access Token จาก Google
+    const tokens = await googleAuth.validateAuthorizationCode(code, storedCodeVerifier);
+    
+    // 2. ดึงข้อมูลโปรไฟล์จาก Google
+    const googleUserResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+    });
+    const googleUser = (await googleUserResponse.json()) as any;
+
+    // 3. จัดการ Database (ค้นหา, สร้างใหม่, หรือเชื่อมบัญชี)
+    let [existingUser] = await db.select().from(users).where(eq(users.email, googleUser.email)).limit(1);
+
+    if (!existingUser) {
+      // กรณียังไม่เคยสมัครสมาชิก
+      const [newUser] = await db.insert(users).values({
+        googleId: googleUser.sub,
+        name: googleUser.name,
+        email: googleUser.email,
+        avatarUrl: googleUser.picture, // ถ้าระบุคอลัมน์นี้ไว้ใน schema
+        isActivated: true, 
+      }).returning();
+      existingUser = newUser;
+
+    } else if (!existingUser.googleId) {
+      // กรณีเคยสมัครด้วย Email แล้ว แต่เพิ่งเคยกดปุ่ม Google ครั้งแรก ให้เชื่อมบัญชี
+      await db.update(users)
+        .set({ googleId: googleUser.sub, isActivated: true })
+        .where(eq(users.id, existingUser.id));
+    }
+
+    // 4. ส่งข้อมูล User กลับไปให้ Controller
+    return existingUser;
   }
-}
+};
+

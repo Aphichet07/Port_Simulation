@@ -4,12 +4,14 @@ import { setup } from "./setup";
 import { AuthModule } from "./modules/auth";
 import { MarketModule } from "./modules/market";
 import { OrderModule } from "./modules/order";
+import { PortfolioModule } from "./modules/portfolio";
 
 const app = new Elysia()
     .use(setup)
     .use(AuthModule)
     .use(MarketModule)
     .use(OrderModule)
+    .use(PortfolioModule)
     .get('/', () => { 
         return "Quant Terminal API is online!"; 
     })

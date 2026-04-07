@@ -3,6 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { setup } from "./setup";
 import { AuthModule } from "./modules/auth";
 import { MarketModule } from "./modules/market";
+import { NewsModule } from "./modules/news";
 import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
 
@@ -10,6 +11,7 @@ const app = new Elysia()
     .use(setup)
     .use(AuthModule)
     .use(MarketModule)
+    .use(NewsModule)
     .use(OrderModule)
     .use(PortfolioModule)
     .get('/', () => { 
@@ -18,3 +20,5 @@ const app = new Elysia()
     .listen(process.env.PORT || 8000); 
 
 console.log(`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`);
+console.log(`API documentation available at http://${app.server?.hostname}:${app.server?.port}/docs`);
+

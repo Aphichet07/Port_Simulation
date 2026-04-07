@@ -14,6 +14,21 @@ export const MarketModule = new Elysia({ prefix: "/market" })
 
     return { success: true, data: data };
   })
+  .post('/history', async ({body, set})=>{
+    try {
+      const data = await MarketService.getHistory(body.symbol, body.startDate, body.endDate)
+    }catch(error){
+      set.status = 500
+      console.log(error)
+      return {message: error}
+    }
+  }, {
+    body: t.Object({
+      symbol: t.String(),
+      startDate: t.Date(),
+      endDate: t.Date()
+    })
+  })
 
   .ws("/live", {
     body: t.Object({

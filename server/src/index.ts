@@ -5,13 +5,14 @@ import { AuthModule } from "./modules/auth";
 import { MarketModule } from "./modules/market";
 import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
-
+import {QuantModule } from "./modules/quant"
 const app = new Elysia()
     .use(setup)
     .use(AuthModule)
     .use(MarketModule)
     .use(OrderModule)
     .use(PortfolioModule)
+    .use(QuantModule)
     .get('/', () => { 
         return "Quant Terminal API is online!"; 
     })

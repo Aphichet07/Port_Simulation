@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { users } from "../../db/schema/users";
 import { orders } from "../../db/schema/order";
 import { portfolio } from "../../db/schema/portfolio";
+import { creditTransactions } from "../../db/schema/credits";
 import { MarketService } from "../market/service";
 
 export const OrderService = {
@@ -44,6 +45,16 @@ export const OrderService = {
         quantity: quantity.toString(),
         price: price.toString(),
         totalAmount: totalCost.toString(),
+      });
+
+      // บันทึก credit transaction
+      await tx.insert(creditTransactions).values({
+        userId,
+        amount: totalCost.toString(),
+        type: "BUY",
+        reason: `ซื้อ ${quantity} ${symbolUpper} @ $${price}`,
+        balanceBefore: currentBalance.toString(),
+        balanceAfter: newBalance.toString(),
       });
 
       // เอาของใส่พอร์ตโฟลิโอ
@@ -132,6 +143,17 @@ export const OrderService = {
         quantity: quantity.toString(),
         price: price.toString(),
         totalAmount: totalRevenue.toString(),
+      });
+
+      // บันทึก credit transaction
+      const oldBalance = parseFloat(user.balance || "0");
+      await tx.insert(creditTransactions).values({
+        userId,
+        amount: totalRevenue.toString(),
+        type: "SELL",
+        reason: `ขาย ${quantity} ${symbolUpper} @ $${price}`,
+        balanceBefore: oldBalance.toString(),
+        balanceAfter: newBalance.toString(),
       });
 
       // หักของออกจากพอร์ตโฟลิโอ

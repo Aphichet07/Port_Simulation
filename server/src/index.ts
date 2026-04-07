@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { setup } from "./setup";
@@ -6,6 +7,7 @@ import { MarketModule } from "./modules/market";
 import { NewsModule } from "./modules/news";
 import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
+import { CreditsModule } from "./modules/credits";
 
 const app = new Elysia()
     .use(setup)
@@ -14,6 +16,7 @@ const app = new Elysia()
     .use(NewsModule)
     .use(OrderModule)
     .use(PortfolioModule)
+    .use(CreditsModule)
     .get('/', () => { 
         return "Quant Terminal API is online!"; 
     })

@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package trade;
+
+service TradingService {
+  rpc PlaceOrder (OrderRequest) returns (stream TradeEvent);
+  rpc CancelOrder (CancelRequest) returns (CancelResponse);
+}
+
+message OrderRequest {
+  string symbol = 1;          // เช่น "NVDA", "AAPL"
+  string action = 2;          // "BUY" หรือ "SELL"
+  double trigger_price = 3;   // ราคา trigger
+  string condition = 4;       // "ABOVE" หรือ "BELOW"
+  int32 quantity = 5;
+}
+
+message TradeEvent {
+  string symbol = 1;
+  string action = 2;
+  double trigger_price = 3;
+  double executed_price = 4;
+  int32 quantity = 5;
+  string status = 6;          // "WATCHING", "EXECUTED", "CANCELLED"
+  string timestamp = 7;
+}
+
+message CancelRequest {
+  string order_id = 1;
+}
+
+message CancelResponse {
+  bool success = 1;
+  string message = 2;
+}

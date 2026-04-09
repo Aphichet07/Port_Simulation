@@ -1,0 +1,5 @@
+venv/
+__pycache__/
+*.pyc
+trade_pb2.py
+trade_pb2_grpc.py

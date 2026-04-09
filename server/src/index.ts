@@ -6,7 +6,9 @@ import { MarketModule } from "./modules/market";
 import { NewsModule } from "./modules/news";
 import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
-import {QuantModule } from "./modules/quant"
+import { QuantModule } from "./modules/quant";
+import { AlgoModule } from "./modules/algo";
+
 const app = new Elysia()
     .use(setup)
     .use(AuthModule)
@@ -15,11 +17,12 @@ const app = new Elysia()
     .use(OrderModule)
     .use(PortfolioModule)
     .use(QuantModule)
-    .get('/', () => { 
+    .use(AlgoModule)
+    .use(cors())
+    .get('/', () => {
         return "Quant Terminal API is online!"; 
     })
     .listen(process.env.PORT || 8000); 
 
 console.log(`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`);
 console.log(`API documentation available at http://${app.server?.hostname}:${app.server?.port}/docs`);
-

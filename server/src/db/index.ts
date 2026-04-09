@@ -11,9 +11,9 @@ export const db = drizzle(client, { schema });
 async function checkConnection() {
   try {
     await client`SELECT 1`;
-    console.log("✅ Database connected successfully!");
+    console.log("Database connected successfully!");
   } catch (error) {
-    console.error("❌ Database connection failed!");
+    console.error("Database connection failed!");
     console.error(error);
   }
 }

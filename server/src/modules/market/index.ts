@@ -1,5 +1,7 @@
 import { Elysia, t } from "elysia";
 import { MarketService } from "./service";
+import { QuantService } from "../quant/service";
+
 
 export const MarketModule = new Elysia({ prefix: "/market" })
   .get("/:symbol", async ({ params, set }) => {
@@ -13,6 +15,28 @@ export const MarketModule = new Elysia({ prefix: "/market" })
     }
 
     return { success: true, data: data };
+  })
+  .post('/history', async ({body, set})=>{
+    try {
+      const data = await MarketService.getHistory(body.symbol, body.startDate, body.endDate)
+      return data
+    }catch(error){
+      set.status = 500
+      console.log(error)
+      return {message: error}
+    }
+  }, {
+    body: t.Object({
+      symbol: t.String(),
+      startDate: t.Date(),
+      endDate: t.Date()
+    })
+  })
+  .get('/test', async ()=>{
+    MarketService.test()
+  })
+  .get('/test2', async()=>{
+    MarketService.test2()
   })
 
   .ws("/live", {

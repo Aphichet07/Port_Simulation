@@ -1,15 +1,24 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../../db";
 import { users } from "../../db/schema/users";
-import { orders } from "../../db/schema/order";
-import { portfolio } from "../../db/schema/portfolio";
+import { portfolios } from "../../db/schema/portfolios";
+import { positions } from "../../db/schema/positions"; 
+import { transactions } from "../../db/schema/transactions"; 
+import { assets } from "../../db/schema/assets"; 
 import { MarketService } from "../market/service";
 
 export const OrderService = {
-  async buyAsset(userId: number, symbol: string, quantity: number) {
+  async buyAsset(
+    userId: number,
+    symbol: string, 
+    quantity: number,
+    port_name: string,
+  ) {
+    if (quantity <= 0) throw new Error("จำนวนที่ซื้อต้องมากกว่า 0");
+
     const symbolUpper = symbol.toUpperCase();
 
-    //  ดึงราคาล่าสุดจากตลาด
+    // ดึงราคาล่าสุดจากตลาด
     const marketData = await MarketService.getLivePrice(symbolUpper);
     if (!marketData)
       throw new Error(`ไม่สามารถดึงราคาล่าสุดของ ${symbolUpper} ได้`);
@@ -18,43 +27,81 @@ export const OrderService = {
     const totalCost = quantity * price;
 
     return await db.transaction(async (tx) => {
-      // เช็คเงินในกระเป๋า
-      const [user] = await tx.select().from(users).where(eq(users.id, userId));
-      if (!user) throw new Error("ไม่พบผู้ใช้งาน");
+      let [asset] = await tx
+        .select()
+        .from(assets)
+        .where(eq(assets.symbol, symbolUpper));
 
-      const currentBalance = parseFloat(user.balance || "0");
-      if (currentBalance < totalCost) {
-        throw new Error(
-          `เงินทุนจำลองไม่เพียงพอ (ต้องการ $${totalCost.toFixed(2)} แต่มี $${currentBalance.toFixed(2)})`,
+      // ถ้าไม่เคยมีสินทรัพย์นี้ใน DB ให้สร้างใหม่ทันที
+      if (!asset) {
+        [asset] = await tx
+          .insert(assets)
+          .values({ 
+            symbol: symbolUpper,
+            name: `${symbolUpper} (Auto-created)`, 
+            type: "crypto", 
+            exchange: "UNKNOWN" 
+          })
+          .returning();
+      }
+      if (!asset) throw new Error("System Error: เกิดข้อผิดพลาดในการดึงข้อมูล Asset");
+
+      const assetId = asset.id; 
+
+      // ดึงข้อมูล Portfolio ตามชื่อพอร์ตของ User
+      const [portfolio] = await tx
+        .select()
+        .from(portfolios)
+        .where(
+          and(
+            eq(portfolios.userId, userId),
+            eq(portfolios.port_name, port_name)
+          )
         );
+
+      if (!portfolio) throw new Error("ไม่พบ Portfolio ที่ระบุ");
+
+      // เช็คเงินในกระเป๋า
+      const currentBalance = Number(portfolio.cashBalance ?? 0);
+      if (currentBalance < totalCost) {
+        const error: any = new Error("Insufficient funds");
+        error.insufficient = true;
+        error.required = totalCost;
+        error.available = currentBalance;
+        throw error;
       }
 
-      // ตัดเงิน
+      // ตัดเงิน 
       const newBalance = currentBalance - totalCost;
       await tx
-        .update(users)
-        .set({ balance: newBalance.toString() })
-        .where(eq(users.id, userId));
+        .update(portfolios)
+        .set({ cashBalance: newBalance.toFixed(2) })
+        .where(eq(portfolios.id, portfolio.id));
 
-      // บันทึกประวัติ Order
-      await tx.insert(orders).values({
+      // บันทึกประวัติลง Transactions
+      await tx.insert(transactions).values({
         userId,
-        symbol: symbolUpper,
-        side: "BUY",
+        assetId,
+        type: "BUY",
         quantity: quantity.toString(),
-        price: price.toString(),
-        totalAmount: totalCost.toString(),
+        pricePerUnit: price.toFixed(4),
+        totalAmount: totalCost.toFixed(2),
+        executedAt: new Date(),
       });
 
-      // เอาของใส่พอร์ตโฟลิโอ
+      // จัดการ Positions ในพอร์ต
       const [existingPosition] = await tx
         .select()
-        .from(portfolio)
+        .from(positions)
         .where(
-          and(eq(portfolio.userId, userId), eq(portfolio.symbol, symbolUpper)),
+          and(
+            eq(positions.portfolioId, portfolio.id),
+            eq(positions.assetId, assetId)
+          )
         );
 
       if (existingPosition) {
+        // ถัวเฉลี่ยต้นทุน (DCA)
         const oldQty = parseFloat(existingPosition.quantity);
         const oldAvgPrice = parseFloat(existingPosition.averagePrice);
 
@@ -62,19 +109,20 @@ export const OrderService = {
         const newAvgPrice = (oldQty * oldAvgPrice + totalCost) / newQty;
 
         await tx
-          .update(portfolio)
+          .update(positions)
           .set({
             quantity: newQty.toString(),
-            averagePrice: newAvgPrice.toString(),
+            averagePrice: newAvgPrice.toFixed(4),
             updatedAt: new Date(),
           })
-          .where(eq(portfolio.id, existingPosition.id));
+          .where(eq(positions.id, existingPosition.id));
       } else {
-        await tx.insert(portfolio).values({
-          userId,
-          symbol: symbolUpper,
+        // เพิ่มสินทรัพย์ใหม่เข้าพอร์ต
+        await tx.insert(positions).values({
+          portfolioId: portfolio.id,
+          assetId: assetId,
           quantity: quantity.toString(),
-          averagePrice: price.toString(),
+          averagePrice: price.toFixed(4),
         });
       }
 
@@ -86,7 +134,14 @@ export const OrderService = {
     });
   },
 
-  async sellAsset(userId: number, symbol: string, quantity: number) {
+  async sellAsset(
+    userId: number,
+    symbol: string,
+    quantity: number,
+    port_name: string 
+  ) {
+    if (quantity <= 0) throw new Error("จำนวนที่ขายต้องมากกว่า 0");
+
     const symbolUpper = symbol.toUpperCase();
 
     // ดึงราคาล่าสุดจากตลาด
@@ -98,52 +153,79 @@ export const OrderService = {
     const totalRevenue = quantity * price;
 
     return await db.transaction(async (tx) => {
-      // เช็คว่ามีหุ้นในพอร์ตพอขายไหม
-      const [existingPosition] = await tx
+      const [asset] = await tx
         .select()
-        .from(portfolio)
+        .from(assets)
+        .where(eq(assets.symbol, symbolUpper));
+      
+      if (!asset) throw new Error(`ไม่รู้จักสินทรัพย์ ${symbolUpper} ในระบบ`);
+      const assetId = asset.id;
+
+      // ดึงข้อมูล Portfolio
+      const [portfolio] = await tx
+        .select()
+        .from(portfolios)
         .where(
-          and(eq(portfolio.userId, userId), eq(portfolio.symbol, symbolUpper)),
+          and(
+            eq(portfolios.userId, userId),
+            eq(portfolios.port_name, port_name)
+          )
         );
 
-      if (!existingPosition) throw new Error(`คุณไม่มี ${symbolUpper} ในพอร์ต`);
+      if (!portfolio) throw new Error("ไม่พบ Portfolio ที่ระบุ");
+
+      // เช็คว่ามีสินทรัพย์ในพอร์ตพอขายไหม
+      const [existingPosition] = await tx
+        .select()
+        .from(positions)
+        .where(
+          and(
+            eq(positions.portfolioId, portfolio.id),
+            eq(positions.assetId, assetId) 
+          )
+        );
+
+      if (!existingPosition) throw new Error(`คุณไม่มี ${symbolUpper} ในพอร์ตนี้`);
 
       const currentQty = parseFloat(existingPosition.quantity);
       if (currentQty < quantity)
         throw new Error("จำนวนสินทรัพย์ไม่เพียงพอสำหรับการขาย");
 
       // เพิ่มเงินเข้ากระเป๋า
-      const [user] = await tx.select().from(users).where(eq(users.id, userId));
-      if (!user) {
-        throw new Error("ไม่พบ user");
-      }
-      const newBalance = parseFloat(user.balance || "0") + totalRevenue;
+      const currentBalance = parseFloat(portfolio.cashBalance?.toString() || "0");
+      const newBalance = currentBalance + totalRevenue;
 
       await tx
-        .update(users)
-        .set({ balance: newBalance.toString() })
-        .where(eq(users.id, userId));
+        .update(portfolios)
+        .set({ cashBalance: newBalance.toFixed(2) })
+        .where(eq(portfolios.id, portfolio.id));
 
-      // บันทึกประวัติ Order
-      await tx.insert(orders).values({
+      // บันทึกประวัติลง Transactions
+      await tx.insert(transactions).values({
         userId,
-        symbol: symbolUpper,
-        side: "SELL",
+        assetId,
+        type: "SELL",
         quantity: quantity.toString(),
-        price: price.toString(),
-        totalAmount: totalRevenue.toString(),
+        pricePerUnit: price.toFixed(4),
+        totalAmount: totalRevenue.toFixed(2),
+        executedAt: new Date(),
       });
 
-      // หักของออกจากพอร์ตโฟลิโอ
+      // หักของออกจาก Positions
       const remainingQty = currentQty - quantity;
 
-      if (remainingQty === 0) {
-        await tx.delete(portfolio).where(eq(portfolio.id, existingPosition.id));
+      if (remainingQty <= 0) { 
+        // ขายหมดเกลี้ยง ลบ Position ทิ้ง
+        await tx.delete(positions).where(eq(positions.id, existingPosition.id));
       } else {
+        // อัปเดตจำนวนที่เหลือ
         await tx
-          .update(portfolio)
-          .set({ quantity: remainingQty.toString(), updatedAt: new Date() })
-          .where(eq(portfolio.id, existingPosition.id));
+          .update(positions)
+          .set({ 
+            quantity: remainingQty.toString(), 
+            updatedAt: new Date() 
+          })
+          .where(eq(positions.id, existingPosition.id));
       }
 
       return {

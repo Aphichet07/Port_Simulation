@@ -62,5 +62,5 @@
 
 ### 2. Setup Quant Engine (Bun/Elysia)
 ```bash
-cd core-engine
+cd server
 bun install

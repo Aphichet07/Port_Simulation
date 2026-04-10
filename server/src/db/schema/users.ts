@@ -1,4 +1,4 @@
-import { pgTable, serial, text, varchar, boolean, timestamp , numeric} from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, boolean, timestamp } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -7,7 +7,6 @@ export const users = pgTable('users', {
   password: text('password'),
   googleId: varchar('google_id', { length: 255 }).unique(), 
   avatarUrl: text('avatar_url'),
-  balance: numeric('balance', { precision: 15, scale: 2 }).default('100000.00'),
   isActivated: boolean('is_activated').default(false), 
   activationToken: text('activation_token'),          
   createdAt: timestamp('created_at').defaultNow(),

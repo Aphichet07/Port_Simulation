@@ -20,6 +20,7 @@ export const OrderModule = new Elysia({ prefix: "/orders" })
           userId,
           body.symbol,
           body.quantity,
+          body.port_name
         );
         return result;
       } catch (error: any) {
@@ -31,6 +32,7 @@ export const OrderModule = new Elysia({ prefix: "/orders" })
       body: t.Object({
         symbol: t.String(),
         quantity: t.Numeric(),
+        port_name: t.String()
       }),
     },
   )
@@ -43,6 +45,7 @@ export const OrderModule = new Elysia({ prefix: "/orders" })
           userId,
           body.symbol,
           body.quantity,
+          body.port_name
         );
         return result;
       } catch (error: any) {
@@ -54,6 +57,7 @@ export const OrderModule = new Elysia({ prefix: "/orders" })
       body: t.Object({
         symbol: t.String(),
         quantity: t.Numeric(),
+        port_name: t.String()
       }),
     },
   );

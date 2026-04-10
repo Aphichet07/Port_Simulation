@@ -32,7 +32,6 @@ export const AuthService = {
         name: data.name,
         email: data.email,
         password: hashedPassword,
-        balance: "100000.00",
         activationToken: token,
         isActivated: false,
       })

@@ -2,9 +2,23 @@ import { Elysia, t } from "elysia";
 import { MarketService } from "./service";
 import { QuantService } from "../quant/service";
 
-
 export const MarketModule = new Elysia({ prefix: "/market" })
-  .get("/:symbol", async ({ params, set }) => {
+  .get("/asset", async ({ set }) => {
+    try {
+      const data = await MarketService.getAllAssets();
+      return {
+        success: true,
+        total: data.length,
+        data: data,
+      };
+    } catch (error: any) {
+      console.log(error);
+      set.status = 500;
+      return { message: error };
+    }
+  })
+
+  .get("/asset/:symbol", async ({ params, set }) => {
     const symbol = params.symbol;
 
     const data = await MarketService.getLivePrice(symbol);
@@ -16,27 +30,35 @@ export const MarketModule = new Elysia({ prefix: "/market" })
 
     return { success: true, data: data };
   })
-  .post('/history', async ({body, set})=>{
-    try {
-      const data = await MarketService.getHistory(body.symbol, body.startDate, body.endDate)
-      return data
-    }catch(error){
-      set.status = 500
-      console.log(error)
-      return {message: error}
-    }
-  }, {
-    body: t.Object({
-      symbol: t.String(),
-      startDate: t.Date(),
-      endDate: t.Date()
-    })
+  .post(
+    "/history",
+    async ({ body, set }) => {
+      try {
+        const data = await MarketService.getHistory(
+          body.symbol,
+          body.startDate,
+          body.endDate,
+        );
+        return data;
+      } catch (error) {
+        set.status = 500;
+        console.log(error);
+        return { message: error };
+      }
+    },
+    {
+      body: t.Object({
+        symbol: t.String(),
+        startDate: t.Date(),
+        endDate: t.Date(),
+      }),
+    },
+  )
+  .get("/test", async () => {
+    MarketService.test();
   })
-  .get('/test', async ()=>{
-    MarketService.test()
-  })
-  .get('/test2', async()=>{
-    MarketService.test2()
+  .get("/test2", async () => {
+    MarketService.test2();
   })
 
   .ws("/live", {
@@ -72,7 +94,7 @@ export const MarketModule = new Elysia({ prefix: "/market" })
         const symbol = message.symbol;
         const intervalId = (ws.data as any)[`interval_${symbol}`];
         if (intervalId) {
-          clearInterval(intervalId); 
+          clearInterval(intervalId);
           console.log(`User unsubscribed from: ${symbol}`);
         }
       }

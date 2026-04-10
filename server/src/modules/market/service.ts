@@ -1,6 +1,9 @@
 import YahooFinance from "yahoo-finance2";
 import { ComputeReturn } from "../../common/utils/computeReturn";
 import { ComputeReturnRisk } from "../../common/utils/computeReturnRisk";
+import { assets } from "../../db/schema/assets";
+import {db} from "../../db/index"
+
 const yahooFinance = new YahooFinance();
 const priceCache = new Map<
   string,
@@ -8,6 +11,13 @@ const priceCache = new Map<
 >();
 
 export const MarketService = {
+
+ async getAllAssets() {
+    const allAssets = await db.select().from(assets);
+    return allAssets;
+  },
+
+
   async getLivePrice(symbol: string) {
     const symbolUpper = symbol.toUpperCase();
     const now = Date.now();
@@ -24,7 +34,7 @@ export const MarketService = {
       );
 
       const data = (await response.json()) as any;
-      console.log(data)
+      console.log(data);
       if (data.c === 0 && data.d === null) {
         throw new Error("ไม่พบข้อมูลหุ้นสัญลักษณ์นี้");
       }

@@ -1,81 +1,85 @@
 import { AlgoService } from "./service";
 
-export const AlgoController = {
+// Helper: แปลง Promise ให้เป็น {success, data/error}
+const handle = async <T>(fn: () => Promise<T>) => {
+  try {
+    const data = await fn();
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
 
+export const AlgoController = {
+  // Deploy bot ไปยัง Docker
   async deploy(body: {
     script: string;
     symbol: string;
     userId: number;
     token: string;
   }) {
-    try {
-      const container = await AlgoService.deployBot(body);
-      return { success: true, data: container };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+    return handle(() => AlgoService.deployBot(body));
   },
 
+  // ดูทุก bots ทั้งหมด
   async getContainers() {
-    try {
-      const containers = await AlgoService.listContainers();
-      return { success: true, data: containers };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+    return handle(() => AlgoService.listContainers());
   },
 
+  // ดู bot ตัวเดียว
   async getContainerById(id: string) {
-    try {
+    return handle(async () => {
       const container = await AlgoService.getContainer(id);
-      if (!container) return { success: false, error: "ไม่พบ bot" };
-      return { success: true, data: container };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+      if (!container) throw new Error("ไม่พบ bot");
+      return container;
+    });
   },
 
+  // หยุด bot
   async stopContainer(id: string) {
-    try {
+    return handle(async () => {
       await AlgoService.stopBot(id);
-      return { success: true, message: `Bot ${id} stopped` };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+      return { message: `Bot ${id} stopped` };
+    });
   },
 
+  // ดู logs ของ bot
   async getLogs(id: string) {
-    try {
-      const logs = await AlgoService.getLogs(id);
-      return { success: true, data: logs };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+    return handle(() => AlgoService.getLogs(id));
   },
 
+  // ดู trade history
   async getTrades(containerId: string) {
-    try {
-      const trades = await AlgoService.getTradeHistory(containerId);
-      return { success: true, data: trades };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+    return handle(() => AlgoService.getTradeHistory(containerId));
   },
 
-  async reportTrade(containerId: string, trade: {
-    action: "BUY" | "SELL";
-    symbol: string;
-    quantity: number;
-    executed_price: number;
-  }) {
-    try {
+  // บันทึก trade (callback จาก SDK)
+  async reportTrade(
+    containerId: string,
+    trade: {
+      action: "BUY" | "SELL";
+      symbol: string;
+      quantity: number;
+      executed_price: number;
+    }
+  ) {
+    return handle(async () => {
       await AlgoService.recordTrade(containerId, {
         ...trade,
         timestamp: new Date().toISOString(),
       });
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
-    }
+      return { message: "Trade recorded" };
+    });
+  },
+
+  // Backtest script ก่อน deploy
+  async backtest(body: {
+    script: string;
+    symbol: string;
+    timeframe: string;
+    start_date?: string;
+    end_date?: string;
+  }) {
+    return handle(() => AlgoService.backtestScript(body));
   },
 };

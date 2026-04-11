@@ -5,7 +5,6 @@ import { AlgoController } from "./controller";
 export const AlgoModule = new Elysia({ prefix: "/algo" })
   .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET! }))
 
-  // ── Authenticated routes ────────────────────────
   .derive(async ({ jwt, headers: { authorization } }) => {
     if (!authorization?.startsWith("Bearer ")) throw new Error("Unauthorized");
     const token = authorization.slice(7);
@@ -14,7 +13,6 @@ export const AlgoModule = new Elysia({ prefix: "/algo" })
     return { userId: payload.userId as number, token };
   })
 
-  // POST /algo/deploy — ส่ง script ไปรันใน Docker sandbox
   .post(
     "/deploy",
     async ({ body, userId, token, set }) => {
@@ -35,42 +33,36 @@ export const AlgoModule = new Elysia({ prefix: "/algo" })
     }
   )
 
-  // GET /algo/containers — ดู bot ทั้งหมด
   .get("/containers", async ({ set }) => {
     const result = await AlgoController.getContainers();
     if (!result.success) set.status = 500;
     return result;
   })
 
-  // GET /algo/containers/:id — ดู bot ตัวเดียว
   .get("/containers/:id", async ({ params, set }) => {
     const result = await AlgoController.getContainerById(params.id);
     if (!result.success) set.status = 404;
     return result;
   })
 
-  // GET /algo/containers/:id/logs — ดู logs ของ bot
-  .get("/containers/:id/logs", async ({ params, set }) => {
-    const result = await AlgoController.getLogs(params.id);
-    if (!result.success) set.status = 404;
-    return result;
-  })
-
-  // POST /algo/containers/:id/stop — หยุด bot
   .post("/containers/:id/stop", async ({ params, set }) => {
     const result = await AlgoController.stopContainer(params.id);
     if (!result.success) set.status = 400;
     return result;
   })
 
-  // GET /algo/containers/:id/trades — ดูประวัติ trade
+  .get("/containers/:id/logs", async ({ params, set }) => {
+    const result = await AlgoController.getLogs(params.id);
+    if (!result.success) set.status = 404;
+    return result;
+  })
+
   .get("/containers/:id/trades", async ({ params, set }) => {
     const result = await AlgoController.getTrades(params.id);
     if (!result.success) set.status = 404;
     return result;
   })
 
-  // POST /algo/containers/:id/report — SDK callback (bot รายงาน trade)
   .post(
     "/containers/:id/report",
     async ({ params, body, set }) => {
@@ -84,6 +76,25 @@ export const AlgoModule = new Elysia({ prefix: "/algo" })
         symbol: t.String(),
         quantity: t.Number(),
         executed_price: t.Number(),
+      }),
+    }
+  )
+
+  .post(
+    "/backtest",
+    async ({ body, set }) => {
+      const result = await AlgoController.backtest(body);
+      if (!result.success) set.status = 400;
+      return result;
+    },
+    {
+      body: t.Object({
+        script: t.String(),
+        symbol: t.String(),
+        timeframe: t.String(),
+        start_date: t.Optional(t.String()),
+        end_date: t.Optional(t.String()),
+        max_trades: t.Optional(t.Number()),
       }),
     }
   );

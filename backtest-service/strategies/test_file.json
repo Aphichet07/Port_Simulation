@@ -1,0 +1,8 @@
+{
+  "script": "sma_strategy.py",
+  "symbol": "AAPL",
+  "timeframe": "1d",
+  "start_date": "2025-01-01",
+  "end_date": "2025-12-31",
+  "max_trades": 5
+}

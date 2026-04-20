@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
 import { PortfolioService } from "./service";
+import { string } from "mathjs";
 
 export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
   .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET! }))
@@ -28,13 +29,26 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
       return { message: error };
     }
   })
-  .get('/analytic', async({userId, set})=>{
-    try{
+  .get("/inform/:portName", async ({params, userId,set})=>{
+    try {
+      const portName = params.portName
+      const result = await PortfolioService.getAssetInPort(portName)
+      set.status = 200
+      return {message: "Success" , data: result}
+    }catch(error: any){
+      console.log(error.message)
+      return {message: error.message}
+    }
+
+  })
+
+  .get("/analytic", async ({ userId, set }) => {
+    try {
       // ค่อยทำ รอ utils เสร็จหมดก่อน
-    }catch(error:any){
-      console.log(error)
-      set.status = 500
-      return {message: error}
+    } catch (error: any) {
+      console.log(error);
+      set.status = 500;
+      return { message: error };
     }
   })
   .post(
@@ -131,6 +145,49 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
       body: t.Object({
         quantity: t.Numeric(),
         average_price: t.Numeric(),
+      }),
+    },
+  )
+  .post(
+    "/create",
+    async ({ userId, body, set }) => {
+      try {
+        const result = await PortfolioService.Create(
+          userId,
+          body.name,
+          body.asset,
+        );
+        set.status = 201;
+        return {
+          success: true,
+          message: "Portfolio created successfully",
+          data: result,
+        };
+      } catch (error: any) {
+        console.log(error.message);
+        set.status = 500;
+        return {
+          message: error.message,
+        };
+      }
+    },
+    {
+      body: t.Object({
+        name: t.String({ error: "กรุณาระบุชื่อกลยุทธ์" }),
+        asset: t.Array(
+          t.Object({
+            symbol: t.String({ error: "ต้องมีชื่อสินทรัพย์ (เช่น BTC, AAPL)" }),
+            weight: t.Number({
+              minimum: 0,
+              maximum: 1,
+              error: "สัดส่วน (Weight) ต้องเป็นตัวเลขระหว่าง 0 ถึง 1 เท่านั้น",
+            }),
+          }),
+          {
+            minItems: 1,
+            error: "ต้องเลือกสินทรัพย์อย่างน้อย 1 ตัว",
+          },
+        ),
       }),
     },
   )

@@ -97,7 +97,7 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
 
       const token = await jwt.sign({ userId: user.id });
       set.status = 200;
-      
+      console.log(`Login Success Bearer ${token}`)
       return {
         message: "Login Success",
         token,

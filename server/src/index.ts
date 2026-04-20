@@ -6,7 +6,7 @@ import { MarketModule } from "./modules/market";
 import { NewsModule } from "./modules/news";
 import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
-import { QuantModule } from "./modules/quant";
+import { BacktestModule } from "./modules/backtest";
 import { AlgoModule } from "./modules/algo";
 
 const app = new Elysia()
@@ -16,7 +16,7 @@ const app = new Elysia()
     .use(NewsModule)
     .use(OrderModule)
     .use(PortfolioModule)
-    .use(QuantModule)
+    .use(BacktestModule)
     .use(AlgoModule)
     .use(cors())
     .get('/', () => {

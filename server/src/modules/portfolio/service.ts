@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { users } from "../../db/schema/users";
 import { portfolios } from "../../db/schema/portfolios";
@@ -6,6 +6,12 @@ import { positions } from "../../db/schema/positions";
 import { transactions } from "../../db/schema/transactions";
 import { assets } from "../../db/schema/assets";
 import { MarketService } from "../market/service";
+import { portfolioAssets } from "../../db/schema/portfolio_asset";
+
+export interface AssetInput {
+  symbol: string;
+  weight: number;
+}
 
 export const PortfolioService = {
   // เช็คพอร์ตในบัญชีนี้
@@ -105,6 +111,60 @@ export const PortfolioService = {
       totalAssetValue,
       positions: enrichedPositions,
     };
+  },
+  async Create(userId: number, name: string, assets: AssetInput[]) {
+    const totalWeight = assets.reduce((sum, item) => sum + item.weight, 0);
+    if (Math.abs(totalWeight - 1) > 0.0001) {
+      throw new Error(
+        `Total asset weight must be exactly 1. Current is ${totalWeight}`,
+      );
+    }
+
+    try {
+      const result = await db.transaction(async (tx) => {
+        const [newPortfolio] = await tx
+          .insert(portfolios)
+          .values({
+            userId: userId,
+            port_name: name,
+          })
+          .returning({
+            id: portfolios.id,
+            port_name: portfolios.port_name,
+            cashBalance: portfolios.cashBalance,
+          });
+
+        if (!newPortfolio || newPortfolio.id === undefined) {
+          throw new Error("Failed to create portfolio record.");
+        }
+
+        const assetsToInsert = assets.map((a) => ({
+          portfolioId: newPortfolio.id,
+          symbol: a.symbol.toUpperCase(),
+          weight: a.weight.toString(),
+        }));
+
+        const insertedAssets = await tx
+          .insert(portfolioAssets)
+          .values(assetsToInsert)
+          .returning({
+            symbol: portfolioAssets.symbol,
+            weight: portfolioAssets.weight,
+          });
+
+        return {
+          ...newPortfolio,
+          assets: insertedAssets,
+        };
+      });
+
+      return result;
+    } catch (error: any) {
+      console.error("[PortfolioService.createPortfolio] Error:", error);
+      throw new Error(
+        "Could not create portfolio. Database transaction failed.",
+      );
+    }
   },
 
   // ดึงประวัติการทำธุรกรรมย้อนหลัง
@@ -286,4 +346,20 @@ export const PortfolioService = {
       };
     });
   },
+
+  async getAssetInPort(portName: string) {
+  const result = await db
+    .select({
+      symbol: portfolioAssets.symbol,
+      weight: sql<number>`CAST(${portfolioAssets.weight} AS FLOAT)`,
+    })
+    .from(portfolios)
+    .innerJoin(
+      portfolioAssets,
+      eq(portfolios.id, portfolioAssets.portfolioId)
+    )
+    .where(eq(portfolios.port_name, portName));
+
+  return result;
+}
 };

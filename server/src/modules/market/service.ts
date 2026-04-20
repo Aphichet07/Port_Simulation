@@ -120,4 +120,46 @@ export const MarketService = {
       `Sharpe: ${sharpe.toFixed(2)} | Vol: ${(vol * 100).toFixed(2)}%`,
     );
   },
+
+  async getBenchmarkPrices(
+    symbol: string,
+    startDate: Date,
+    endDate: Date,
+    commonDates: string[]
+  ): Promise<number[]> {
+    if (commonDates.length === 0) return [];
+
+    const queryOptions = {
+      period1: startDate,
+      period2: endDate,
+      interval: '1d' as const,
+    };
+
+    const result = await yahooFinance.historical(symbol, queryOptions);
+
+    const dataMap = new Map<string, number>();
+    for (const item of result) {
+      const dateStr = item.date.toISOString().split('T')[0];
+      
+      if (dateStr && item.close !== undefined) {
+        dataMap.set(dateStr, item.close);
+      }
+    }
+
+    const benchmarkPrices: number[] = [];
+    let lastValidPrice = 0; 
+
+    for (const date of commonDates) {
+      const price = dataMap.get(date);
+      
+      if (price !== undefined) {
+        lastValidPrice = price;
+        benchmarkPrices.push(price);
+      } else {
+        benchmarkPrices.push(lastValidPrice);
+      }
+    }
+
+    return benchmarkPrices;
+  }
 };

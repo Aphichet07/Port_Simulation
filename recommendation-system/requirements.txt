@@ -1,0 +1,15 @@
+# Data Manipulation & Fetching
+scipy
+pandas>=2.0.0
+numpy>=1.24.0
+yfinance>=0.2.0
+pandas-datareader>=0.10.0
+
+# Machine Learning & ML
+scikit-learn>=1.2.0
+
+# (Optional) สำหรับเทสโค้ดและทำ API ในอนาคต
+jupyterlab
+fastapi
+uvicorn
+PyPortfolioOpt

@@ -1,10 +1,11 @@
 import { pgTable, serial, integer, numeric, varchar, timestamp } from 'drizzle-orm/pg-core';
 import { users } from './users';
 import { assets } from './assets';
+import { portfolios } from './portfolios';
 
 export const transactions = pgTable('transactions', {
   id: serial('id').primaryKey(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  portfolioId: integer('portfolio_id').references(() => portfolios.id).notNull(),
   assetId: integer('asset_id').references(() => assets.id).notNull(),
   
   type: varchar('type', { length: 10 }).notNull(), 

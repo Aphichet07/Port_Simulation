@@ -95,37 +95,31 @@ export const AuthService = {
   },
   
   async loginWithGoogle(code: string, storedCodeVerifier: string) {
-    // 1. เอา Code ไปแลกเป็น Access Token จาก Google
     const tokens = await googleAuth.validateAuthorizationCode(code, storedCodeVerifier);
     
-    // 2. ดึงข้อมูลโปรไฟล์จาก Google
     const googleUserResponse = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-      headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      headers: { Authorization: `Bearer ${tokens.accessToken()}` }
     });
     const googleUser = (await googleUserResponse.json()) as any;
 
-    // 3. จัดการ Database (ค้นหา, สร้างใหม่, หรือเชื่อมบัญชี)
     let [existingUser] = await db.select().from(users).where(eq(users.email, googleUser.email)).limit(1);
 
     if (!existingUser) {
-      // กรณียังไม่เคยสมัครสมาชิก
       const [newUser] = await db.insert(users).values({
         googleId: googleUser.sub,
         name: googleUser.name,
         email: googleUser.email,
-        avatarUrl: googleUser.picture, // ถ้าระบุคอลัมน์นี้ไว้ใน schema
+        avatarUrl: googleUser.picture, 
         isActivated: true, 
       }).returning();
       existingUser = newUser;
 
     } else if (!existingUser.googleId) {
-      // กรณีเคยสมัครด้วย Email แล้ว แต่เพิ่งเคยกดปุ่ม Google ครั้งแรก ให้เชื่อมบัญชี
       await db.update(users)
         .set({ googleId: googleUser.sub, isActivated: true })
         .where(eq(users.id, existingUser.id));
     }
 
-    // 4. ส่งข้อมูล User กลับไปให้ Controller
     return existingUser;
   }
 };

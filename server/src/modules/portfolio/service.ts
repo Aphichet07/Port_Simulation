@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { db } from "../../db";
 import { users } from "../../db/schema/users";
 import { portfolios } from "../../db/schema/portfolios";
@@ -6,12 +6,29 @@ import { positions } from "../../db/schema/positions";
 import { transactions } from "../../db/schema/transactions";
 import { assets } from "../../db/schema/assets";
 import { MarketService } from "../market/service";
+import { portfolioAssets } from "../../db/schema/portfolio_asset";
+
+export interface AssetInput {
+  symbol: string;
+  weight: number;
+}
 
 export const PortfolioService = {
+  async getAssetsByPortfolioId(portfolioId: number) {
+    return await db
+      .select({
+        symbol: assets.symbol,
+        weight: portfolioAssets.weight,
+      })
+      .from(portfolioAssets)
+      .innerJoin(assets, eq(portfolioAssets.assetId, assets.id))
+      .where(eq(portfolioAssets.portfolioId, portfolioId));
+  },
   // เช็คพอร์ตในบัญชีนี้
   async getMyPort(userId: number) {
     const ports = await db
       .select({
+        id: portfolios.id,
         port_name: portfolios.port_name,
       })
       .from(portfolios)
@@ -106,14 +123,73 @@ export const PortfolioService = {
       positions: enrichedPositions,
     };
   },
+  async Create(userId: number, name: string, assetsInput: AssetInput[]) {
+    const totalWeight = assetsInput.reduce((sum, item) => sum + item.weight, 0);
+    if (Math.abs(totalWeight - 1) > 0.0001) {
+      throw new Error(
+        `Total asset weight must be exactly 1. Current is ${totalWeight}`,
+      );
+    }
+
+    try {
+      return await db.transaction(async (tx) => {
+        const symbols = assetsInput.map((a) => a.symbol.toUpperCase());
+        const dbAssets = await tx
+          .select()
+          .from(assets)
+          .where(inArray(assets.symbol, symbols));
+
+        if (dbAssets.length !== symbols.length) {
+          throw new Error("Some assets were not found in the database.");
+        }
+
+        const symbolToIdMap = new Map(dbAssets.map((a) => [a.symbol, a.id]));
+
+        const [newPortfolio] = await tx
+          .insert(portfolios)
+          .values({
+            userId: userId,
+            port_name: name,
+            cashBalance: "100000.00",
+          })
+          .returning();
+
+        if (!newPortfolio) throw new Error("Failed to create portfolio.");
+
+        const assetsToInsert = assetsInput.map((a) => {
+          const assetId = symbolToIdMap.get(a.symbol.toUpperCase());
+          if (!assetId) throw new Error(`Asset ID for ${a.symbol} not found`);
+
+          return {
+            portfolioId: newPortfolio.id,
+            assetId: assetId,
+            weight: a.weight.toString(),
+          };
+        });
+
+        const insertedAssets = await tx
+          .insert(portfolioAssets)
+          .values(assetsToInsert)
+          .returning();
+
+        return {
+          ...newPortfolio,
+          assets: insertedAssets,
+        };
+      });
+    } catch (error: any) {
+      console.error("[PortfolioService.Create] Error:", error);
+      throw new Error(error.message || "Could not create portfolio.");
+    }
+  },
 
   // ดึงประวัติการทำธุรกรรมย้อนหลัง
-  async getTransactionHistory(userId: number) {
+  async getTransactionHistory(portfolioId: number) {
     // ดึงประวัติจากตาราง transactions
     const history = await db
       .select()
       .from(transactions)
-      .where(eq(transactions.userId, userId))
+      .where(eq(transactions.portfolioId, portfolioId))
       .orderBy(desc(transactions.executedAt)) // อิงจาก executed_at ใน DB
       .limit(50);
 
@@ -285,5 +361,20 @@ export const PortfolioService = {
         message: `ลบพอร์ตโฟลิโอ ${port_name} สำเร็จเรียบร้อยแล้ว`,
       };
     });
+  },
+
+  async getAssetInPort(portName: string) {
+    const result = await db
+      .select({
+        symbol: assets.symbol,
+      })
+      .from(portfolios)
+      .innerJoin(
+        portfolioAssets,
+        eq(portfolios.id, portfolioAssets.portfolioId),
+      )
+      .innerJoin(assets, eq(portfolioAssets.assetId, assets.id));
+
+    return result;
   },
 };

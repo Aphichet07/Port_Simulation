@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
 import { jwt } from "@elysiajs/jwt";
+import { swagger } from "@elysiajs/swagger";
 import { PortfolioService } from "./service";
-import { string } from "mathjs";
 
 export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
+  .use(swagger())
   .use(jwt({ name: "jwt", secret: process.env.JWT_SECRET! }))
   .derive(async ({ jwt, headers: { authorization } }) => {
     if (!authorization?.startsWith("Bearer ")) throw new Error("Unauthorized");
@@ -12,45 +13,45 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
     if (!payload) throw new Error("Unauthorized");
     return { userId: payload.userId as number };
   })
-  .get("/me", async ({ userId, set }) => {
-    try {
-      const port = await PortfolioService.getMyPort(userId);
-      if (!port) {
-        set.status = 400;
-        return { message: "ไม่มี port ในบัญชีนี้" };
+
+  .get(
+    "/me",
+    async ({ userId, set }) => {
+      try {
+        const port = await PortfolioService.getMyPort(userId);
+        if (!port) {
+          set.status = 400;
+          return { message: "ไม่มี port ในบัญชีนี้" };
+        }
+
+        return { success: true, portfolio: port };
+      } catch (error: any) {
+        set.status = 500;
+        return { message: error.message };
       }
-      return {
-        success: true,
-        portfolio: port,
-      };
-    } catch (error: any) {
-      console.log(error);
-      set.status = 500;
-      return { message: error };
-    }
-  })
-  .get("/inform/:portName", async ({params, userId,set})=>{
-    try {
-      const portName = params.portName
-      const result = await PortfolioService.getAssetInPort(portName)
-      set.status = 200
-      return {message: "Success" , data: result}
-    }catch(error: any){
-      console.log(error.message)
-      return {message: error.message}
-    }
+    },
+    {
+      detail: { tags: ["Portfolio"], summary: "ดึงรายการพอร์ตทั้งหมดของฉัน" },
+    },
+  )
 
-  })
+  .get(
+    "/inform/:portName",
+    async ({ params, set }) => {
+      try {
+        const result = await PortfolioService.getAssetInPort(params.portName);
+        return { message: "Success", data: result };
+      } catch (error: any) {
+        set.status = 500;
+        return { message: error.message };
+      }
+    },
+    {
+      params: t.Object({ portName: t.String() }),
+      detail: { tags: ["Portfolio"], summary: "ดึงข้อมูลสินทรัพย์ภายในพอร์ต" },
+    },
+  )
 
-  .get("/analytic", async ({ userId, set }) => {
-    try {
-      // ค่อยทำ รอ utils เสร็จหมดก่อน
-    } catch (error: any) {
-      console.log(error);
-      set.status = 500;
-      return { message: error };
-    }
-  })
   .post(
     "/",
     async ({ body, userId, set }) => {
@@ -59,36 +60,23 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
           userId,
           body.port_name,
         );
-
         set.status = 201;
-        return {
-          success: true,
-          message: "สร้างพอร์ตโฟลิโอสำเร็จ",
-          data: port,
-        };
+        return { success: true, message: "สร้างพอร์ตโฟลิโอสำเร็จ", data: port };
       } catch (error: any) {
-        console.error("Create Portfolio Error:", error);
-
         set.status = 500;
-        return {
-          success: false,
-          message: error.message || "เกิดข้อผิดพลาดในการสร้างพอร์ตโฟลิโอ",
-        };
+        return { success: false, message: error.message };
       }
     },
     {
-      body: t.Object({
-        port_name: t.String(),
-      }),
+      body: t.Object({ port_name: t.String() }),
+      detail: { tags: ["Portfolio"], summary: "สร้างพอร์ตโฟลิโอใหม่" },
     },
   )
 
-  // ดึงภาพรวมพอร์ต
   .get(
     "/:port_name",
     async ({ params, userId, set }) => {
       try {
-        console.log(userId, params.port_name);
         const data = await PortfolioService.getPortfolioSummary(
           userId,
           params.port_name,
@@ -100,22 +88,27 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
       }
     },
     {
-      query: t.Object({
-        port_name: t.String(),
-      }),
+      params: t.Object({ port_name: t.String() }),
+      detail: { tags: ["Portfolio"], summary: "ดึงภาพรวมพอร์ตโฟลิโอ" },
     },
   )
 
-  // ดึงประวัติการซื้อขาย
-  .get("/history", async ({ userId, set }) => {
-    try {
-      const data = await PortfolioService.getTransactionHistory(userId);
-      return { success: true, data };
-    } catch (error: any) {
-      set.status = 400;
-      return { success: false, error: error.message };
-    }
-  })
+  .get(
+    "/history",
+    async ({ userId, set }) => {
+      try {
+        const data = await PortfolioService.getTransactionHistory(userId);
+        return { success: true, data };
+      } catch (error: any) {
+        set.status = 400;
+        return { success: false, error: error.message };
+      }
+    },
+    {
+      detail: { tags: ["History"], summary: "ดึงประวัติการซื้อขายทั้งหมด" },
+    },
+  )
+
   .put(
     "/:port_name/assets/:symbol",
     async ({ userId, params, body, set }) => {
@@ -126,15 +119,10 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
           params.symbol,
           body.quantity,
         );
-
         return { success: true, ...result };
       } catch (error: any) {
-        console.error(error);
         set.status = 400;
-        return {
-          success: false,
-          error: error.message || "เกิดข้อผิดพลาดในการอัปเดตข้อมูลสินทรัพย์",
-        };
+        return { success: false, error: error.message };
       }
     },
     {
@@ -146,8 +134,10 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
         quantity: t.Numeric(),
         average_price: t.Numeric(),
       }),
+      detail: { tags: ["Asset"], summary: "อัปเดตจำนวนสินทรัพย์ในพอร์ต" },
     },
   )
+
   .post(
     "/create",
     async ({ userId, body, set }) => {
@@ -158,17 +148,10 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
           body.asset,
         );
         set.status = 201;
-        return {
-          success: true,
-          message: "Portfolio created successfully",
-          data: result,
-        };
+        return { success: true, data: result };
       } catch (error: any) {
-        console.log(error.message);
         set.status = 500;
-        return {
-          message: error.message,
-        };
+        return { message: error.message };
       }
     },
     {
@@ -176,69 +159,33 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
         name: t.String({ error: "กรุณาระบุชื่อกลยุทธ์" }),
         asset: t.Array(
           t.Object({
-            symbol: t.String({ error: "ต้องมีชื่อสินทรัพย์ (เช่น BTC, AAPL)" }),
-            weight: t.Number({
-              minimum: 0,
-              maximum: 1,
-              error: "สัดส่วน (Weight) ต้องเป็นตัวเลขระหว่าง 0 ถึง 1 เท่านั้น",
-            }),
+            symbol: t.String(),
+            weight: t.Number({ minimum: 0, maximum: 1 }),
           }),
-          {
-            minItems: 1,
-            error: "ต้องเลือกสินทรัพย์อย่างน้อย 1 ตัว",
-          },
+          { minItems: 1 },
         ),
       }),
+      detail: {
+        tags: ["Portfolio"],
+        summary: "สร้างพอร์ตพร้อมกำหนดสัดส่วนสินทรัพย์",
+      },
     },
   )
 
-  .put(
+  .delete(
     "/:port_name",
-    async ({ userId, params, body, set }) => {
+    async ({ userId, params, set }) => {
       try {
-        const updatedPort = await PortfolioService.updatePortfolioName(
-          userId,
-          params.port_name,
-          body.new_port_name,
-        );
-
-        return {
-          success: true,
-          message: "อัปเดตชื่อพอร์ตโฟลิโอสำเร็จ",
-          data: updatedPort,
-        };
+        await PortfolioService.deletePort(userId, params.port_name);
+        set.status = 204;
+        return;
       } catch (error: any) {
-        console.log(error);
-        set.status = 400;
-        return {
-          success: false,
-          message: error.message || "เกิดข้อผิดพลาดในการอัปเดตพอร์ต",
-        };
+        set.status = 500;
+        return { message: error.message };
       }
     },
     {
-      params: t.Object({
-        port_name: t.String(),
-      }),
-      body: t.Object({
-        new_port_name: t.String(),
-      }),
+      params: t.Object({ port_name: t.String() }),
+      detail: { tags: ["Portfolio"], summary: "ลบพอร์ตโฟลิโอ" },
     },
-  )
-
-  .delete("/:port_name", async ({ userId, params, set }) => {
-    try {
-      const port = await PortfolioService.deletePort(userId, params.port_name);
-
-      if (!port.success) {
-        set.status = 500;
-        return { message: "ลบพอร์ตไม่สำเร็จ" };
-      }
-      set.status = 204;
-      return;
-    } catch (error: any) {
-      console.log(error);
-      set.status = 500;
-      return { message: error };
-    }
-  });
+  );

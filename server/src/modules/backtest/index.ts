@@ -1,57 +1,104 @@
 import { Elysia, t } from "elysia";
 import { BacktestService } from "./service";
-import type { AssetInput } from "./service";
 import { PortfolioService } from "../portfolio/service";
-import { generateQuantReport,getFullAnalyticsAuto} from "../report/service";
+import { getFullAnalyticsAuto } from "../report/service";
 import { MarketService } from "../market/service";
 
-
 export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
-  "/report/:port_name",
+  "/report/:id", 
   async ({ params, query, set }) => {
     try {
-      const portName = params.port_name;
-      
-      const assets = await PortfolioService.getAssetInPort(portName);
+      const { id: portfolioId } = params; 
+      const { start: startStr, end: endStr, initialCapital } = query;
 
-      const start = new Date(query.start as string);
-      const end = new Date(query.end as string);
-      const capital = query.initialCapital
-        ? Number(query.initialCapital)
-        : 10000;
+      //  ดึงข้อมูลสินทรัพย์และน้ำหนัก
+      const rawAssets =
+        await PortfolioService.getAssetsByPortfolioId(portfolioId);
+
+      if (!rawAssets || rawAssets.length === 0) {
+        set.status = 404;
+        return { error: `ไม่พบสินทรัพย์ในพอร์ตไอดี: ${portfolioId}` };
+      }
+
+      const assets = rawAssets.map((a) => ({
+        symbol: a.symbol,
+        weight: parseFloat(a.weight),
+      }));
+
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      const capital = initialCapital ?? 10000;
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         set.status = 400;
-        return { error: "Invalid date format. Use YYYY-MM-DD" };
+        return { error: "รูปแบบวันที่ไม่ถูกต้อง กรุณาใช้ YYYY-MM-DD" };
       }
 
-      const backtestResult = await BacktestService.Analytic(assets, start, end, capital);
-
-      const benchmarkPrices = await MarketService.getBenchmarkPrices(
-        "^GSPC", 
-        start, 
-        end, 
-        backtestResult.dates
+      // (ส่งข้อมูล assets ที่มีทั้ง symbol และ weight เข้าไปคำนวณ)
+      const backtestResult = await BacktestService.Analytic(
+        assets,
+        start,
+        end,
+        capital,
       );
-      
-      const finalReport = getFullAnalyticsAuto(assets, backtestResult, benchmarkPrices);
-      
-      return finalReport;
-    } catch (error: any) {
-      set.status = 500;
+
+      // ดึงราคา Benchmark (S&P 500) 
+      const benchmarkPrices = await MarketService.getBenchmarkPrices(
+        "^GSPC",
+        start,
+        end,
+        backtestResult.dates,
+      );
+
+      // รายงานสรุปผล
+      const finalReport = getFullAnalyticsAuto(
+        assets,
+        backtestResult,
+        benchmarkPrices,
+      );
+
       return {
-        error: error.message || "An error occurred during backtesting",
+        success: true,
+        data: finalReport,
+      };
+    } catch (error) {
+      const err = error as Error;
+      set.status = 500;
+      console.error("[BacktestModule] Error:", err);
+      return {
+        success: false,
+        error: err.message || "เกิดข้อผิดพลาดระหว่างการทำ Backtesting",
       };
     }
   },
   {
     params: t.Object({
-      port_name: t.String(),
+      // เปลี่ยนเป็น Numeric เพื่อให้ Elysia แปลง string ใน URL เป็น number ให้โดยอัตโนมัติ
+      id: t.Numeric({
+        description: "ไอดีของพอร์ตโฟลิโอ (PK จากตาราง portfolios)",
+      }),
     }),
     query: t.Object({
-      start: t.String({ default: "1995-01-01" }),
-      end: t.String({ default: "2025-12-31" }),
-      initialCapital: t.Optional(t.String()),
+      start: t.String({
+        default: "2020-01-01",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+        description: "วันที่เริ่มต้นวิเคราะห์",
+      }),
+      end: t.String({
+        default: "2024-12-31",
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$",
+        description: "วันที่สิ้นสุดวิเคราะห์",
+      }),
+      initialCapital: t.Optional(
+        t.Numeric({
+          default: 10000,
+          description: "เงินทุนสมมติเริ่มต้น",
+        }),
+      ),
     }),
+    detail: {
+      tags: ["Backtest"],
+      summary: "สร้างรายงานวิเคราะห์พอร์ตย้อนหลัง",
+    },
   },
 );

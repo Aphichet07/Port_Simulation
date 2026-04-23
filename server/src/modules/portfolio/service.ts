@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { db } from "../../db";
 import { users } from "../../db/schema/users";
 import { portfolios } from "../../db/schema/portfolios";
@@ -14,10 +14,21 @@ export interface AssetInput {
 }
 
 export const PortfolioService = {
+  async getAssetsByPortfolioId(portfolioId: number) {
+    return await db
+      .select({
+        symbol: assets.symbol,
+        weight: portfolioAssets.weight,
+      })
+      .from(portfolioAssets)
+      .innerJoin(assets, eq(portfolioAssets.assetId, assets.id))
+      .where(eq(portfolioAssets.portfolioId, portfolioId));
+  },
   // เช็คพอร์ตในบัญชีนี้
   async getMyPort(userId: number) {
     const ports = await db
       .select({
+        id: portfolios.id,
         port_name: portfolios.port_name,
       })
       .from(portfolios)
@@ -112,8 +123,8 @@ export const PortfolioService = {
       positions: enrichedPositions,
     };
   },
-  async Create(userId: number, name: string, assets: AssetInput[]) {
-    const totalWeight = assets.reduce((sum, item) => sum + item.weight, 0);
+  async Create(userId: number, name: string, assetsInput: AssetInput[]) {
+    const totalWeight = assetsInput.reduce((sum, item) => sum + item.weight, 0);
     if (Math.abs(totalWeight - 1) > 0.0001) {
       throw new Error(
         `Total asset weight must be exactly 1. Current is ${totalWeight}`,
@@ -121,59 +132,64 @@ export const PortfolioService = {
     }
 
     try {
-      const result = await db.transaction(async (tx) => {
+      return await db.transaction(async (tx) => {
+        const symbols = assetsInput.map((a) => a.symbol.toUpperCase());
+        const dbAssets = await tx
+          .select()
+          .from(assets)
+          .where(inArray(assets.symbol, symbols));
+
+        if (dbAssets.length !== symbols.length) {
+          throw new Error("Some assets were not found in the database.");
+        }
+
+        const symbolToIdMap = new Map(dbAssets.map((a) => [a.symbol, a.id]));
+
         const [newPortfolio] = await tx
           .insert(portfolios)
           .values({
             userId: userId,
             port_name: name,
+            cashBalance: "100000.00",
           })
-          .returning({
-            id: portfolios.id,
-            port_name: portfolios.port_name,
-            cashBalance: portfolios.cashBalance,
-          });
+          .returning();
 
-        if (!newPortfolio || newPortfolio.id === undefined) {
-          throw new Error("Failed to create portfolio record.");
-        }
+        if (!newPortfolio) throw new Error("Failed to create portfolio.");
 
-        const assetsToInsert = assets.map((a) => ({
-          portfolioId: newPortfolio.id,
-          symbol: a.symbol.toUpperCase(),
-          weight: a.weight.toString(),
-        }));
+        const assetsToInsert = assetsInput.map((a) => {
+          const assetId = symbolToIdMap.get(a.symbol.toUpperCase());
+          if (!assetId) throw new Error(`Asset ID for ${a.symbol} not found`);
+
+          return {
+            portfolioId: newPortfolio.id,
+            assetId: assetId,
+            weight: a.weight.toString(),
+          };
+        });
 
         const insertedAssets = await tx
           .insert(portfolioAssets)
           .values(assetsToInsert)
-          .returning({
-            symbol: portfolioAssets.symbol,
-            weight: portfolioAssets.weight,
-          });
+          .returning();
 
         return {
           ...newPortfolio,
           assets: insertedAssets,
         };
       });
-
-      return result;
     } catch (error: any) {
-      console.error("[PortfolioService.createPortfolio] Error:", error);
-      throw new Error(
-        "Could not create portfolio. Database transaction failed.",
-      );
+      console.error("[PortfolioService.Create] Error:", error);
+      throw new Error(error.message || "Could not create portfolio.");
     }
   },
 
   // ดึงประวัติการทำธุรกรรมย้อนหลัง
-  async getTransactionHistory(userId: number) {
+  async getTransactionHistory(portfolioId: number) {
     // ดึงประวัติจากตาราง transactions
     const history = await db
       .select()
       .from(transactions)
-      .where(eq(transactions.userId, userId))
+      .where(eq(transactions.portfolioId, portfolioId))
       .orderBy(desc(transactions.executedAt)) // อิงจาก executed_at ใน DB
       .limit(50);
 
@@ -348,18 +364,17 @@ export const PortfolioService = {
   },
 
   async getAssetInPort(portName: string) {
-  const result = await db
-    .select({
-      symbol: portfolioAssets.symbol,
-      weight: sql<number>`CAST(${portfolioAssets.weight} AS FLOAT)`,
-    })
-    .from(portfolios)
-    .innerJoin(
-      portfolioAssets,
-      eq(portfolios.id, portfolioAssets.portfolioId)
-    )
-    .where(eq(portfolios.port_name, portName));
+    const result = await db
+      .select({
+        symbol: assets.symbol,
+      })
+      .from(portfolios)
+      .innerJoin(
+        portfolioAssets,
+        eq(portfolios.id, portfolioAssets.portfolioId),
+      )
+      .innerJoin(assets, eq(portfolioAssets.assetId, assets.id));
 
-  return result;
-}
+    return result;
+  },
 };

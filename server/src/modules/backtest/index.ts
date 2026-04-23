@@ -49,8 +49,8 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
       port_name: t.String(),
     }),
     query: t.Object({
-      start: t.String({ default: "2023-01-01" }),
-      end: t.String({ default: "2023-12-31" }),
+      start: t.String({ default: "1995-01-01" }),
+      end: t.String({ default: "2025-12-31" }),
       initialCapital: t.Optional(t.String()),
     }),
   },

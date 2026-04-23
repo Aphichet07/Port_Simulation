@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { MarketService } from "./service";
-import { BacktestSetvice } from "../backtest/service";
+import { BacktestService } from "../backtest/service";
 
 export const MarketModule = new Elysia({ prefix: "/market" })
   .get("/asset", async ({ set }) => {

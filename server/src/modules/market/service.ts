@@ -1,6 +1,4 @@
 import YahooFinance from "yahoo-finance2";
-import { ComputeReturn } from "../../common/utils/computeReturn";
-import { ComputeReturnRisk } from "../../common/utils/computeReturnRisk";
 import { assets } from "../../db/schema/assets";
 import {db} from "../../db/index"
 
@@ -81,45 +79,7 @@ export const MarketService = {
       return [];
     }
   },
-  async test() {
-    const historyData = await MarketService.getHistory(
-      "AAPL",
-      new Date("2023-01-01"),
-      new Date("2024-01-31"),
-    );
-
-    const pricesOnly = historyData.map((item) => item.closePrice) as any;
-    const totalRet = ComputeReturn.TotalReturn(pricesOnly);
-    const cagrRet = ComputeReturn.CAGR(pricesOnly);
-    const rolling1Y = ComputeReturn.RollingReturn(pricesOnly, 252);
-
-    console.log(`Total Return: ${(totalRet * 100).toFixed(2)}%`);
-    console.log(`CAGR: ${(cagrRet * 100).toFixed(2)}%`);
-    console.log(`rolling1Y ${rolling1Y.length}`);
-  },
-  async test2() {
-    const historyData = await MarketService.getHistory(
-      "AAPL",
-      new Date("2023-01-01"),
-      new Date("2024-01-31"),
-    );
-    const prices = historyData.map((item) => item.closePrice) as any;
-
-    // สร้าง Daily Returns
-    const dailyReturns: number[] = [];
-    for (let i = 1; i < prices.length; i++) {
-      const prev = prices[i - 1]!;
-      dailyReturns.push((prices[i]! - prev) / prev);
-    }
-
-    // เรียกใช้แบบ Type-safe
-    const sharpe = ComputeReturnRisk.SharpeRatio(dailyReturns);
-    const vol = ComputeReturnRisk.getVolatility(dailyReturns);
-
-    console.log(
-      `Sharpe: ${sharpe.toFixed(2)} | Vol: ${(vol * 100).toFixed(2)}%`,
-    );
-  },
+  
 
   async getBenchmarkPrices(
     symbol: string,

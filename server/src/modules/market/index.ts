@@ -54,12 +54,6 @@ export const MarketModule = new Elysia({ prefix: "/market" })
       }),
     },
   )
-  .get("/test", async () => {
-    MarketService.test();
-  })
-  .get("/test2", async () => {
-    MarketService.test2();
-  })
 
   .ws("/live", {
     body: t.Object({

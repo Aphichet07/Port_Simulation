@@ -1,11 +1,6 @@
 import json
 import os
-
-try:
-    import yfinance as yf
-except ImportError:
-    print(json.dumps({"error": "yfinance ยังไม่ได้ลง install\nกรุณารัน: pip install yfinance"}))
-    exit(1)
+import yfinance as yf
 
 # ดึงตัวแปรจาก environment
 symbol = os.getenv("BACKTEST_SYMBOL", "AAPL")
@@ -168,7 +163,7 @@ for i in range(26, len(prices)):
     # ─── BUY signal ───
     if position is None:
         ema_uptrend = ema_short[i] > ema_long[i]
-        rsi_ok = 30 < rsi[i] < 65
+        rsi_ok = 35 < rsi[i] < 70
         macd_bullish = macd_hist[i] > 0
 
         if ema_uptrend and rsi_ok and macd_bullish:

@@ -4,3 +4,6 @@ numpy
 scikit-learn
 ta
 fastapi
+uvicorn
+tensorflow
+textblob

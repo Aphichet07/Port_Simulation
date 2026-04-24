@@ -13,3 +13,4 @@ jupyterlab
 fastapi
 uvicorn
 PyPortfolioOpt
+pydantic

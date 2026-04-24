@@ -1,18 +1,19 @@
 import pandas as pd
-from clustering import Clustering
-from context_model import MarketContextEngine
-from risk_model import RiskModelEngine
-from optimization import PortfolioOptimizer
+from .clustering import Clustering
+from .context_model import MarketContextEngine
+from .risk_model import RiskModelEngine
+from .optimization import PortfolioOptimizer
+from pathlib import Path
 
 class Engine:
-    def __init__(self, rec_data_path, forecast_data_path, risk_data_path):
-        """
-        ข้อมูลที่ส่งเข้ามาจะเป็นไฟล์ dataset ทั้งหมด
-        """
-        print("Initializing Recommendation Pipeline...")
-        self.rec_data_path = rec_data_path
-        self.forecast_data_path = forecast_data_path
-        self.risk_data_path = risk_data_path
+    def __init__(self, rec_data_path=None, forecast_data_path=None, risk_data_path=None):
+        
+        BASE_DIR = Path(__file__).resolve().parent.parent.parent
+        DATA_DIR = BASE_DIR / "data" / "processed"
+
+        self.rec_data_path = rec_data_path or str(DATA_DIR / "recommendation_features.csv")
+        self.forecast_data_path = forecast_data_path or str(DATA_DIR / "forecast_features.csv")
+        self.risk_data_path = risk_data_path or str(DATA_DIR / "risk_returns.csv")
         
         self.clustering_engine = Clustering(n_clusters=3)
         self.context_engine = MarketContextEngine(self.forecast_data_path)
@@ -61,14 +62,12 @@ class Engine:
             },
             "original_portfolio": current_portfolio_dict,
             "recommended_candidates": rec_details[['Ticker', 'Style_Label', 'Risk_Score (Corr)']].to_dict(orient='records'),
-            "portfolio_optimization": {
+            
+                "portfolio_optimization": {
                 "target_weights_pct": optimization_result['target_weights_pct'],
                 "rebalancing_plan": optimization_result['rebalancing_plan'],
-                "projected_performance": {
-                    "expected_return_pct": optimization_result['expected_annual_return_pct'],
-                    "volatility_pct": optimization_result['annual_volatility_pct'],
-                    "sharpe_ratio": optimization_result['sharpe_ratio']
-                }
+                "projected_performance": optimization_result['projected_performance'] 
+            
             }
         }
         

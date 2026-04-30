@@ -4,6 +4,7 @@ import os
 import math
 import sys
 import warnings
+import re
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
@@ -18,6 +19,15 @@ from sklearn.impute import SimpleImputer
 class FeatureEngineer:
     def __init__(self):
         pass
+        
+    def clean_text(self, text: str) -> str:
+        """ ทำความสะอาดข้อความแบบง่ายๆ """
+        if not isinstance(text, str):
+            return ""
+        text = text.lower()
+        # เก็บไว้แค่ ก-ฮ, a-z, 0-9
+        text = re.sub(r'[^\w\sก-๙]', ' ', text)
+        return text.strip()
     
     def handleMissingValue():
         pass
@@ -30,4 +40,5 @@ class FeatureEngineer:
     
     
 if __name__ == "__main__":
-    print("Hello")
+    pass
+

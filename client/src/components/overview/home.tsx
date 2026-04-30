@@ -10,6 +10,7 @@ import {
   TrendingUp, RefreshCcw, Cpu, Zap, ShieldCheck, Trash2, Save, Plus
 } from 'lucide-react';
 
+
 import {AppHeader} from "./header";
 import { AssetPerformanceTable } from "./asset";
 import { MarketFeed } from "./livemarket";
@@ -18,7 +19,7 @@ import { SimulationEditor } from "./stock";
 
 // --- Main App ---
 
-const App = () => {
+const HomePage = () => {
   const [activeTab, setActiveTab] = useState('Home');
   const [selectedAssetId, setSelectedAssetId] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -52,8 +53,8 @@ const App = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500 selection:text-white flex flex-col h-screen overflow-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-        * { font-family: 'Work Sans', sans-serif !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+        * { font-family: 'Work Sans', 'Noto Sans Thai' !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -61,10 +62,10 @@ const App = () => {
       `}} />
 
         
-      <AppHeader activeTab={activeTab} setActiveTab={setActiveTab} />
+      <AppHeader  />
 
-      <div className="flex-1 overflow-hidden px-4 lg:px-8 pb-4 lg:pb-8">
-        <main className="w-full h-full bg-[#F8FAFC] rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-4 lg:p-8 overflow-y-auto custom-scrollbar relative">
+      <div className="flex-1 overflow-hidden px-8 pb-8">
+        <main className="w-full h-full bg-white  rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-8 lg:p-10 overflow-y-auto custom-scrollbar">
           {activeTab === 'Home' ? renderHome() : (
             <div className="flex flex-col items-center justify-center h-full text-slate-300">
               <RefreshCcw size={80} className="animate-spin mb-10 opacity-10" />
@@ -87,4 +88,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default HomePage;

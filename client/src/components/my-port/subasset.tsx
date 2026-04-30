@@ -26,7 +26,7 @@ const Badge = ({ val, status, index }) => {
   }
 
   return (
-    <span className={`inline-block w-[75px] py-1.5 rounded-[6px] text-[9px] font-black ${selectedStyle}  uppercase`}>
+    <span className={`inline-block w-18.75 py-1.5 rounded-md text-[9px] font-black ${selectedStyle}  uppercase`}>
       {val}
     </span>
   );
@@ -48,7 +48,7 @@ const PORTFOLIOS = [
   'Aggressive Growth',
   'Conservative Income'
 ];
-export const AssetPerformanceTable = ({ 
+export const PerformanceTable = ({ 
   isPortfolioDropdownOpen, 
   setIsPortfolioDropdownOpen, 
   selectedPortfolio, 
@@ -57,7 +57,7 @@ export const AssetPerformanceTable = ({
   setSelectedAssetId 
 }) => {
   return (
-    <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-6 lg:p-8 shadow-sm flex flex-col h-full text-slate-900">
+    <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-6 lg:p-8 shadow-sm flex flex-col h-160 text-slate-900">
       <div className="flex justify-between items-start mb-8">
         <div>
           <h2 className="text-xl  font-medium text-slate-800 tracking-tight">Asset Class Performance</h2>
@@ -92,7 +92,7 @@ export const AssetPerformanceTable = ({
     </div>
 
     <div className="flex-1 overflow-y-auto custom-scrollbar">
-      <table className="w-full text-left min-w-[400px]">
+      <table className="w-full text-left min-w-100">
         <thead>
           <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
             <th className="pb-4 w-[40%]">Asset Class</th>

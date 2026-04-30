@@ -18,7 +18,7 @@ export const MarketFeed = ({ chartData }) =>{return (
       </div>
       <div>
         <h3 className="text-xl font-medium text-slate-800 leading-none">Live Market Feed</h3>
-        <p className="text-[12px] font-light text-slate-400 uppercase mt-0">ข้อมูลตลาดแบบเรียลไทม์</p>
+        <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">ข้อมูลตลาดแบบเรียลไทม์</p>
       </div>
     </div>
     

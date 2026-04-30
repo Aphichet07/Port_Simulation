@@ -19,7 +19,7 @@ export const SimulationEditor = ({ hftCode, setHftCode }) => {return(
         </div>
         <div>
           <h3 className="text-xl font-medium text-slate-800 leading-none">Stock Simulation</h3>
-          <p className="text-[12px] font-light text-slate-400 uppercase mt-0">การจำลองการซื้อขายหุ้น</p>
+          <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">การจำลองการซื้อขายหุ้น</p>
         </div>
       </div>
       <button className="cursor-pointer bg-black text-white px-8 py-3 rounded-[10px] text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all shadow-xl">

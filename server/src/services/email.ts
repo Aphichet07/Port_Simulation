@@ -9,7 +9,7 @@ export const sendActivationEmail = async (email: string, token: string) => {
     from: 'QuantTerminal <onboarding@resend.dev>',
     to: email,
     subject: 'ยืนยันการสมัครสมาชิกของคุณ',
-    html: `
+    html: `P
       <h1>ยินดีต้อนรับ!</h1>
       <p>กรุณาคลิกลิงก์ด้านล่างเพื่อยืนยันอีเมลและเปิดใช้งานบัญชีของคุณ:</p>
       <a href="${activationUrl}">คลิกที่นี่เพื่อยืนยันตัวตน</a>

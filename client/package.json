@@ -16,13 +16,9 @@
     "next": "^16.2.4",
     "react": "^19.2.4",
     "react-dom": "19.2.4",
-<<<<<<< HEAD
-    "recharts": "^3.8.1"
-=======
-    "react-markdown": "^10.1.0",
     "recharts": "^3.8.1",
+    "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
->>>>>>> c30561fe96fa775c288bdf1ec0d7c558cee25759
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -15,11 +15,6 @@ import { AppHeader } from '../overview/header';
 const MAX_BALANCE = 100000;
 
 
-
-
-
-
-
 // --- Main Application ---
 
 const App = () => {
@@ -63,8 +58,7 @@ const App = () => {
     // Simulate DB Write
     try {
       const prompt = `ผู้ใช้บันทึกการตั้งค่าใหม่: เงิน $${balance}, ความเสี่ยง ${risk}, สกุลเงิน ${currency}. สรุปสั้นๆ ให้ผู้ใช้หน่อย`;
-      const aiResponse = await callGemini(prompt);
-      
+      const aiResponse = ""
       setDbBalance(balance);
       setDbRisk(risk);
       setDbCurrency(currency);
@@ -78,7 +72,7 @@ const App = () => {
     }
   };
 
-  const getRiskStyles = (level) => {
+  const getRiskStyles = (level: string) => {
     switch(level) {
       case 'LOW': return { active: 'bg-[#10B981] text-white', text: 'text-[#10B981]', label: 'ง่าย (Low Risk)' };
       case 'MODERATE': return { active: 'bg-[#F59E0B] text-white', text: 'text-[#F59E0B]', label: 'กลาง (Medium Risk)' };
@@ -102,13 +96,13 @@ const App = () => {
         
         {/* Alerts & Toasts */}
         {errorMsg && (
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[200] bg-rose-600 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-10 duration-300 border border-white/20 font-black uppercase text-xs tracking-widest">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 z-200 bg-rose-600 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-10 duration-300 border border-white/20 font-black uppercase text-xs tracking-widest">
             <AlertCircle size={20} /> {errorMsg}
           </div>
         )}
 
         {saveSuccess && (
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 z-[200] bg-[#10B981] text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-10 duration-300 border border-white/20 font-black uppercase text-xs tracking-widest">
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 z-200 bg-[#10B981] text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-10 duration-300 border border-white/20 font-black uppercase text-xs tracking-widest">
             <CheckCircle2 size={20} /> บันทึกการเปลี่ยนแปลงเรียบร้อยแล้ว
           </div>
         )}
@@ -186,7 +180,7 @@ const App = () => {
               <button
                 key={lv}
                 onClick={() => setRisk(lv)}
-                className={`cursor-pointer flex-1 py-3 text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-[8px] transition-all ${risk === lv ? `${getRiskStyles(lv).active} shadow-lg scale-[1.02]` : 'bg-white text-slate-400 hover:text-black'}`}
+                className={`cursor-pointer flex-1 py-3 text-[10px] md:text-[11px] font-black uppercase tracking-widest rounded-lg transition-all ${risk === lv ? `${getRiskStyles(lv).active} shadow-lg scale-[1.02]` : 'bg-white text-slate-400 hover:text-black'}`}
               >
                 {lv}
               </button>
@@ -238,7 +232,7 @@ const App = () => {
 </main>
       </div>
 
-      <div className="fixed bottom-6 right-6 lg:bottom-12 lg:right-12 z-[200]">
+      <div className="fixed bottom-6 right-6 lg:bottom-12 lg:right-12 z-200">
               <button 
                 onClick={() => setIsChatOpen(!isChatOpen)}
                 className="bg-black text-white p-5 lg:p-6 rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 border border-white/20"

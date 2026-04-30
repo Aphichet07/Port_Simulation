@@ -8,7 +8,17 @@ import {
 
 import { AppHeader } from '../overview/header';
 
-const TRANSACTION_LOGS = [
+interface Transaction {
+  id: string;
+  date: string;
+  asset: string;
+  type: string; // หรือจะใช้ 'BUY' | 'SELL'
+  method: string;
+  amount: string;
+  status: string; // หรือจะใช้ 'SUCCESS' | 'FAIL'
+}
+
+const TRANSACTION_LOGS: Transaction[] = [
   { id: 'TX9921', date: '2026-04-08 14:20', asset: 'AAPL', type: 'BUY', method: 'ONE-TIME', amount: '$1,852.00', status: 'SUCCESS' },
   { id: 'TX9920', date: '2026-04-07 09:15', asset: 'BTC', type: 'BUY', method: 'AUTO-DCA', amount: '$3,420.00', status: 'SUCCESS' },
   { id: 'TX9919', date: '2026-04-05 16:45', asset: 'GOLD', type: 'SELL', method: 'ONE-TIME', amount: '$4,700.20', status: 'SUCCESS' },
@@ -19,24 +29,24 @@ const TRANSACTION_LOGS = [
   { id: 'TX9914', date: '2026-03-08 15:00', asset: 'AAPL', type: 'SELL', method: 'AUTO-DCA', amount: '$152.00', status: 'FAIL' },
 ];
 
-const TypeBadge = ({ type }) => (
-  <span className={`px-3 py-1 rounded-[6px] text-[10px] font-black tracking-widest ${
+// --- 2. ระบุ Type ให้ Props ของ Component ย่อย ---
+const TypeBadge = ({ type }: { type: string }) => (
+  <span className={`px-3 py-1 rounded-md text-[10px] font-black tracking-widest ${
     type === 'BUY' ? 'bg-[#D1FAE5] text-[#059669]' : 'bg-[#FEE2E2] text-[#DC2626]'
   }`}>
     {type}
   </span>
 );
 
-const StatusBadge = ({ status }) => (
-  <span className={`px-3 py-1.5 rounded-[6px] text-[9px] font-black tracking-widest uppercase ${
+const StatusBadge = ({ status }: { status: string }) => (
+  <span className={`px-3 py-1.5 rounded-md text-[9px] font-black tracking-widest uppercase ${
     status === 'SUCCESS' ? 'bg-[#10B981] text-white' : 'bg-[#FF6B6B] text-white'
   } shadow-sm`}>
     {status}
   </span>
 );
 
-// Card layout for mobile
-const TransactionCard = ({ log }) => (
+const TransactionCard = ({ log }: { log: Transaction }) => (
   <div className="bg-white border border-slate-100 rounded-[10px] p-4 shadow-sm flex flex-col gap-3">
     <div className="flex items-center justify-between">
       <span className="text-xs font-black text-slate-900">#{log.id}</span>
@@ -57,10 +67,11 @@ const TransactionCard = ({ log }) => (
 );
 
 const TransactionLogsView = () => {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState<string>('');
 
   const filtered = TRANSACTION_LOGS.filter(log =>
-    log.id.toLowerCase().includes(search.toLowerCase())
+    log.id.toLowerCase().includes(search.toLowerCase()) ||
+    log.asset.toLowerCase().includes(search.toLowerCase()) 
   );
 
   return (
@@ -76,11 +87,10 @@ const TransactionLogsView = () => {
 
       <AppHeader />
 
-      {/* Content Area */}
       <div className="flex-1 overflow-hidden px-3 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
         <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-4 sm:p-6 lg:p-10 overflow-y-auto custom-scrollbar">
 
-          <div className="p-8 bg-white border border-slate-200 rounded-[10px] flex flex-col text-slate-900 mx-auto animate-in fade-in duration-700">
+          <div className="p-4 sm:p-8 bg-white border border-slate-200 rounded-[10px] flex flex-col text-slate-900 mx-auto animate-in fade-in duration-700">
 
             {/* Header: Title & Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-10 lg:mb-16">
@@ -89,11 +99,11 @@ const TransactionLogsView = () => {
                 <p className="text-[11px] sm:text-[12px] font-regular text-slate-400 uppercase mt-1">ประวัติการจำลองการซื้อขายทั้งหมด</p>
               </div>
 
-              <div className="relative w-full sm:w-[260px] lg:w-[320px] group">
+              <div className="relative w-full sm:w-65 lg:w-[320px] group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-black transition-colors" size={16} />
                 <input
                   type="text"
-                  placeholder="Search by ID..."
+                  placeholder="Search by ID or Asset..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   className="w-full bg-slate-50/50 border-b-2 border-slate-100 focus:border-black py-3 sm:py-4 pl-12 pr-4 text-xs outline-none transition-all placeholder:text-slate-300 rounded-t-[10px]"
@@ -101,9 +111,9 @@ const TransactionLogsView = () => {
               </div>
             </div>
 
-            {/* Table — iPad & Desktop (md+) */}
+            {/* Table — Tablet & Desktop */}
             <div className="hidden md:block overflow-x-auto no-scrollbar -mx-2">
-              <table className="w-full border-collapse min-w-[700px]">
+              <table className="w-full border-collapse min-w-175">
                 <thead>
                   <tr className="border-b border-slate-100">
                     <th className="px-4 lg:px-6 py-4 lg:py-6 text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-left">Transaction ID</th>
@@ -143,13 +153,21 @@ const TransactionLogsView = () => {
                   ))}
                 </tbody>
               </table>
+              {filtered.length === 0 && (
+                <div className="py-20 text-center text-slate-300 font-bold uppercase tracking-widest text-xs">
+                  No transactions found
+                </div>
+              )}
             </div>
 
-            {/* Card Layout — Mobile only (< md) */}
+            {/* Card Layout — Mobile only */}
             <div className="flex md:hidden flex-col gap-3">
               {filtered.map((log) => (
                 <TransactionCard key={log.id} log={log} />
               ))}
+              {filtered.length === 0 && (
+                 <div className="py-10 text-center text-slate-300 font-bold text-xs uppercase">No results</div>
+              )}
             </div>
 
           </div>
@@ -157,7 +175,7 @@ const TransactionLogsView = () => {
       </div>
 
       {/* Floating Bot */}
-      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-[200]">
+      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-200">
         <button className="bg-black text-white p-4 sm:p-5 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:scale-110 active:scale-95 transition-all border border-white/10 group relative">
           <Bot size={24} className="sm:hidden" />
           <Bot size={28} className="hidden sm:block" />

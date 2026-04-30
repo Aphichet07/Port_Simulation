@@ -48,7 +48,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
-<<<<<<< Updated upstream
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -57,9 +56,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
   const router = useRouter();
 
   const handleAuth = async (e: React.FormEvent) => {
-=======
-  const handleAuth = (e: React.FormEvent<HTMLFormElement>) => {
->>>>>>> Stashed changes
     e.preventDefault();
     const endpoint = "/auth/login";
     const payload = { email, password };
@@ -188,7 +184,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
                 Terminal ID
               </label>
               <div className="relative group">
-<<<<<<< Updated upstream
                 <Mail
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-black transition-colors"
                   size={16}
@@ -199,13 +194,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
                   placeholder="Email Address"
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-semibold transition-all placeholder:text-slate-300"
-=======
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-black transition-colors" size={16} />
-                <input 
-                  type="email" 
-                  placeholder="Email Address" 
-                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-[12px] font-medium transition-all placeholder:text-slate-300"
->>>>>>> Stashed changes
                   required
                 />
               </div>
@@ -226,7 +214,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
                 }
               </div>
               <div className="relative group">
-<<<<<<< Updated upstream
                 <Lock
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-black transition-colors"
                   size={16}
@@ -246,16 +233,6 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
-=======
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-black transition-colors" size={16} />
-                <input 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
-                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-10 rounded-[10px] outline-none text-[12px] font-medium transition-all placeholder:text-slate-300"
-                  required
-                />
-                
->>>>>>> Stashed changes
               </div>
             </div>
 

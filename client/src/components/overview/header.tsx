@@ -50,7 +50,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
 
   return (
     <>
-      <header className="h-17.5 md:h-22.5 px-3 md:px-4 lg:px-8 flex items-center justify-between shrink-0 gap-2 relative z-[100]">
+      <header className="h-17.5 md:h-22.5 px-3 md:px-4 lg:px-8 flex items-center justify-between shrink-0 gap-2 relative z-100">
         
         {/* Logo */}
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -106,7 +106,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="xl:hidden absolute top-[70px] left-0 right-0 z-[99] bg-black border-b border-white/10 shadow-2xl px-4 py-3 flex flex-col gap-1">
+        <div className="xl:hidden absolute top-17.5 left-0 right-0 z-99 bg-black border-b border-white/10 shadow-2xl px-4 py-3 flex flex-col gap-1">
           {navItems.map(item => (
             <NavItem
               key={item.path}

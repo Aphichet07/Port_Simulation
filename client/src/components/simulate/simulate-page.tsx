@@ -46,7 +46,7 @@ export const SimulateView = () => {
       <div className="flex-1 overflow-hidden px-8 pb-8">
         <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-8 lg:p-10 overflow-y-auto custom-scrollbar">
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-[850px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-212.5">
             
             {/* LEFT COLUMN: Risk Intelligence Terminal*/}
             <div className="lg:col-span-8 bg-white rounded-[10px] border border-slate-200 p-8 shadow-sm flex flex-col text-slate-900">
@@ -55,7 +55,7 @@ export const SimulateView = () => {
                     <h2 className="text-xl font-medium tracking-tight ">Risk Intelligence Terminal</h2>
                     <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">การวิเคราะห์เชิงปริมาณและการจำลองแบบเมทริก</p>
                   </div>
-                  <button className="cursor-pointer bg-black text-white px-6 py-2 rounded-[8px] text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all shadow-md mb-1.5">
+                  <button className="cursor-pointer bg-black text-white px-6 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all shadow-md mb-1.5">
                      <RefreshCcw size={14} /> RUN FULL RE-SIMULATION
                   </button>
                </div>
@@ -109,7 +109,7 @@ export const SimulateView = () => {
       </div>
 
       {/* Floating Chatbot */}
-      <div className="fixed bottom-10 right-10 z-[200]">
+      <div className="fixed bottom-10 right-10 z-200">
         <button className="bg-black text-white p-5 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:scale-110 active:scale-95 transition-all border border-white/10 group relative">
           <Bot size={28} />
           <div className="absolute inset-0 bg-[#B5F28B]/20 rounded-full animate-ping pointer-events-none"></div>

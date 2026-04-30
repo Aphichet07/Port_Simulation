@@ -1,14 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
-} from 'recharts';
-import {
-  Home, Layers, ShoppingCart, History, User,
-  ChevronDown, Search, Activity, Code2, Play, Bot, X, Send,
-  TrendingUp, RefreshCcw, Cpu, Zap, ShieldCheck, Trash2, Save, Plus
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { Bot } from 'lucide-react';
 
 import { AppHeader } from "../overview/header";
 import { GrowthSimulation } from "./growth";
@@ -16,9 +9,12 @@ import { StatsCard } from "./card";
 import { PerformanceTable } from "./subasset";
 
 export const Myport = () => {
+  const [isPortfolioDropdownOpen, setIsPortfolioDropdownOpen] = useState(false);
+  const [selectedPortfolio, setSelectedPortfolio] = useState('Default Portfolio');
+  const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
+
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-[#B5F28B] selection:text-black flex flex-col h-screen overflow-hidden">
-      {/* Import Work Sans */}
       <style dangerouslySetInnerHTML={{
         __html: `
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
@@ -27,25 +23,23 @@ export const Myport = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
       `}} />
 
-      {/* 1. HEADER (Active: Portfolio) */}
       <AppHeader />
 
-      {/* 2. BODY CONTAINER (WHITE BOX) */}
       <div className="flex-1 overflow-hidden px-8 pb-8">
         <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-10 overflow-y-auto custom-scrollbar">
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-225">
 
-            {/* LEFT: Portfolio Growth (7 columns) */}
+            {/* LEFT: Portfolio Growth */}
             <div className="lg:col-span-7 h-212.5">
               <GrowthSimulation />
             </div>
 
-            {/* RIGHT: Stats & Table (5 columns) */}
+            {/* RIGHT: Stats & Table */}
             <div className="lg:col-span-5 flex flex-col gap-8">
 
               {/* Top Stats Card Grid */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <StatsCard
                   label="Portfolio NAV"
                   subLabel="มูลค่าสินทรัพย์สุทธิ (NAV)"
@@ -54,22 +48,29 @@ export const Myport = () => {
                 />
                 <StatsCard
                   label="Portfolio Delta"
-                  subLabel="ความไวต่อทิศทางตลาด (Delta)"
+                  subLabel="ความไวต่อตลาด (Delta)"
                   value="+ 8,500 $"
-                  change="+ 9.64 % จากเมื่อวาน"
+                  change="+ 9.64 %"
                 />
                 <StatsCard
                   label="ML Forecast"
-                  subLabel="แนวโน้มพยากรณ์โดย AI"
+                  subLabel="พยากรณ์โดย AI"
                   value="- 50,000 $"
-                  change="พยากรณ์ล่วงหน้า 30 วัน"
+                  change="30 Days Forecast"
                   isNegative
                 />
               </div>
 
               {/* Asset Class Performance Table */}
               <div className="flex-1 min-h-150">
-                <PerformanceTable />
+                <PerformanceTable 
+                  isPortfolioDropdownOpen={isPortfolioDropdownOpen}
+                  setIsPortfolioDropdownOpen={setIsPortfolioDropdownOpen}
+                  selectedPortfolio={selectedPortfolio}
+                  setSelectedPortfolio={setSelectedPortfolio}
+                  selectedAssetId={selectedAssetId}
+                  setSelectedAssetId={(id: number) => setSelectedAssetId(id)}
+                />
               </div>
 
             </div>

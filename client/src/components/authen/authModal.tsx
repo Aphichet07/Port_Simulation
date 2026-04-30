@@ -48,7 +48,7 @@ export default function AuthModal() {
     setMessage(null);
 
     try {
-      const res = await axios.post(`http://localhost:8000/auth/login`, { email, password });
+      const res = await axios.post(`http://localhost:7000/auth/login`, { email, password });
       const data = res.data;
       
       setMessage({ type: "success", text: "เข้าสู่ระบบสำเร็จ!" });
@@ -74,7 +74,7 @@ export default function AuthModal() {
     setMessage(null);
 
     try {
-      await axios.post(`http://localhost:8000/auth/register`, { email, password, username });
+      await axios.post(`http://localhost:7000/auth/register`, { email, password, username });
       setMessage({ type: "success", text: "สมัครสมาชิกสำเร็จ! กำลังพาไปหน้าเข้าสู่ระบบ..." });
 
       setTimeout(() => {
@@ -94,7 +94,7 @@ export default function AuthModal() {
 
   const handleAuthWithGoogle = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = `http://localhost:8000/auth/google`;
+    window.location.href = `http://localhost:7000/auth/google`;
   };
 
   return (

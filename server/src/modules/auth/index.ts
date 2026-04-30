@@ -88,7 +88,7 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
         google_code_verifier.remove();
 
         const token = await jwt.sign({ userId: user.id });
-        return redirect(`http://localhost:3000/?token=${token}`);
+        return redirect(`http://localhost:3000/test?token=${token}`);
       } catch (error) {
         const err = error as Error;
         set.status = 500;

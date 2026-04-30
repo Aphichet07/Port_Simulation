@@ -77,9 +77,9 @@ class Engine:
 if __name__ == "__main__":
     api_payload = {
         "user_portfolio": {
-            "ED": 0.60,  
-            "DUK": 0.20,
-            "NVDA": 0.20   
+            "AMZN": 0.20,
+            "NVDA": 0.55,
+            "AAPL": 0.25 
         },
         "top_n_recommendations": 3
     }

@@ -9,6 +9,7 @@ import { AppHeader } from "./header";
 import { AssetPerformanceTable } from "./asset";
 import { MarketFeed } from "./livemarket";
 import { SimulationEditor } from "./stock";
+import BonkChatWidget from "@/src/components/ui/bonk"
 
 
 const HomePage = () => {
@@ -28,21 +29,21 @@ const HomePage = () => {
   })), []);
 
   const renderHome = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-500 min-h-screen">
-      <AssetPerformanceTable 
-        isPortfolioDropdownOpen={isPortfolioDropdownOpen}
-        setIsPortfolioDropdownOpen={setIsPortfolioDropdownOpen}
-        selectedPortfolio={selectedPortfolio}
-        setSelectedPortfolio={setSelectedPortfolio}
-        selectedAssetId={selectedAssetId}
-        setSelectedAssetId={(id: number) => setSelectedAssetId(id)} 
-      />
-      <div className="lg:col-span-7 flex flex-col gap-6 text-slate-900">
-        <MarketFeed chartData={chartData} />
-        <SimulationEditor hftCode={hftCode} setHftCode={setHftCode} />
-      </div>
+  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6 animate-in fade-in duration-500">
+    <AssetPerformanceTable 
+      isPortfolioDropdownOpen={isPortfolioDropdownOpen}
+      setIsPortfolioDropdownOpen={setIsPortfolioDropdownOpen}
+      selectedPortfolio={selectedPortfolio}
+      setSelectedPortfolio={setSelectedPortfolio}
+      selectedAssetId={selectedAssetId}
+      setSelectedAssetId={(id: number) => setSelectedAssetId(id)} 
+    />
+    <div className="lg:col-span-7 flex flex-col gap-4 md:gap-6 text-slate-900">
+      <MarketFeed chartData={chartData} />
+      <SimulationEditor hftCode={hftCode} setHftCode={setHftCode} />
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500 selection:text-white flex flex-col h-screen overflow-hidden">
@@ -70,14 +71,7 @@ const HomePage = () => {
       </div>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 lg:bottom-12 lg:right-12 z-200">
-        <button 
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className="bg-black text-white p-5 lg:p-6 rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 border border-white/20 transition-all"
-        >
-          {isChatOpen ? <X size={32}/> : <Bot size={32} />}
-        </button>
-      </div>
+      <BonkChatWidget />
     </div>
   );
 };

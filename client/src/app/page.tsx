@@ -7,11 +7,15 @@ import Myport from "@/src/components/my-port/my-port-page";
 import AuthModal from "../components/authen/authModal";
 import OptimizationResult from "../components/ui/result";
 import PortFolioForm from "@/src/components/ui/form"
+import LandingPage from "@/src/components/landing/landing-page"
 
 export default function Home() {
 
   return (
-    <HomePage />
+    //<HomePage />
+    //<AuthModal />
+    <LandingPage />
+    //<BonkChatWidget />
     // <div>
     //   <BonkChatWidget></BonkChatWidget>
     //   <PortFolioForm/>

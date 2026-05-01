@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import { AppHeader } from '../overview/header';
+import BonkChatWidget from "@/src/components/ui/bonk"
 
 interface Transaction {
   id: string;
@@ -175,13 +176,7 @@ const TransactionLogsView = () => {
       </div>
 
       {/* Floating Bot */}
-      <div className="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-200">
-        <button className="bg-black text-white p-4 sm:p-5 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:scale-110 active:scale-95 transition-all border border-white/10 group relative">
-          <Bot size={24} className="sm:hidden" />
-          <Bot size={28} className="hidden sm:block" />
-          <div className="absolute inset-0 bg-[#B5F28B]/20 rounded-full animate-ping pointer-events-none"></div>
-        </button>
-      </div>
+      <BonkChatWidget />
     </div>
   );
 };

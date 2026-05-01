@@ -19,7 +19,8 @@ export const SimulationEditor: React.FC<SimulationEditorProps> = ({
   );
 
   return (
-    <div className="bg-white rounded-[10px] border border-slate-200 p-6 lg:p-8 shadow-sm flex flex-col flex-1 min-h-100">
+   <div className="bg-white rounded-[10px] border border-slate-200 p-4 md:p-6 lg:p-8 shadow-sm flex flex-col flex-1 min-h-[250px] md:min-h-100">
+
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div className="flex items-center gap-3">
@@ -45,29 +46,28 @@ export const SimulationEditor: React.FC<SimulationEditorProps> = ({
       </div>
 
       {/* Editor Section */}
-      <div className="relative flex-1 bg-white rounded-[10px] border border-slate-200 p-6 flex gap-4 overflow-hidden shadow-inner group hover:border-black transition-colors duration-500">
+      <div className="relative flex-1 bg-white rounded-[10px] border border-slate-200 p-3 md:p-6 flex gap-3 md:gap-4 overflow-hidden shadow-inner group hover:border-black transition-colors duration-500 min-h-[180px]">
         {/* Line Numbers - เลื่อนตาม textarea */}
-        <div className="text-slate-300 text-right select-none font-mono text-xs w-6 border-r border-slate-100 pr-4 h-full leading-6 overflow-hidden">
-          {lines.map((num) => (
-            <div key={num}>{num}</div>
-          ))}
-        </div>
-
-        {/* Code Input */}
-        <textarea
-          value={hftCode}
-          onChange={(e) => setHftCode(e.target.value)}
-          spellCheck="false"
-          placeholder="// เขียนสคริปต์การซื้อขายที่นี่..."
-          className="flex-1 bg-transparent border-none outline-none font-mono text-[13px] text-slate-700 leading-6 resize-none custom-scrollbar italic font-medium min-h-full"
-        />
+      <div className="text-slate-300 text-right select-none font-mono text-[10px] md:text-xs w-5 md:w-6 border-r border-slate-100 pr-2 md:pr-4 h-full leading-6 overflow-hidden">
+      {lines.map((num) => <div key={num}>{num}</div>)}
       </div>
 
-      {/* Footer Hint */}
-      <div className="mt-3 flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-        <span>Language: JavaScript / HFT Engine</span>
-        <span>Lines: {lineCount}</span>
-      </div>
+      {/* Code Input */}
+      <textarea
+      value={hftCode}
+      onChange={(e) => setHftCode(e.target.value)}
+      spellCheck="false"
+      placeholder="// เขียนสคริปต์การซื้อขายที่นี่..."
+      className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] md:text-[13px] text-slate-700 leading-6 resize-none custom-scrollbar italic font-medium"
+    />
+  </div>
+
+  {/* Footer */}
+  <div className="mt-3 flex justify-between items-center text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+    <span className="hidden sm:inline">Language: JavaScript / HFT Engine</span>
+    <span className="sm:hidden">JS / HFT</span>
+    <span>Lines: {lineCount}</span>
+  </div>
     </div>
   );
 };

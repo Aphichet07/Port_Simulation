@@ -3,6 +3,10 @@ import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+import { 
+  X, Bot, ChevronDown,Send
+} from 'lucide-react';
+
 interface Message {
   id: number;
   text: string;
@@ -66,20 +70,32 @@ function BonkChatWidget() {
 
   return (
     <>
+    {/* import font  */}
+    <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+        * { font-family: 'Work Sans', 'Noto Sans Thai', sans-serif !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}} />
+
+
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 flex items-center justify-center transition-transform active:scale-90"
+        className="cursor-pointer fixed bottom-6 right-6 sm:bottom-10 sm:right-10 z-200 w-18 h-18 bg-black text-white  rounded-full  shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:scale-110 flex items-center justify-center transition-transform active:scale-100"
       >
-        {isOpen ? "ปิด" : "แชท"}
+        {isOpen ? <ChevronDown size={42}/> : <Bot size={34} />}
       </button>
 
       <div
-        className={`fixed z-40 bg-white top-20 bottom-20 right-4 w-96 rounded-2xl shadow-2xl overflow-hidden flex flex-col origin-bottom-right transition-all duration-200 ${
+        className={`fixed z-40 bg-white top-20 bottom-30 right-10 w-90 rounded-2xl shadow-2xl overflow-hidden flex flex-col origin-bottom-right transition-all duration-200 ${
           isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="bg-blue-600 text-white p-4 font-semibold text-lg shrink-0">
+        <div className="bg-black text-white p-4 font-semibold text-lg sm:text-xl shrink-0">
           Bonk Bot
+          <div className="text-[11px] sm:text-[12px] font-light">Quant Assistant</div>
         </div>
 
         <div className="flex-1 p-4 bg-gray-50 overflow-y-auto flex flex-col gap-3">
@@ -91,7 +107,7 @@ function BonkChatWidget() {
               <div
                 className={`max-w-[85%] px-4 py-2 text-sm shadow-sm whitespace-pre-wrap ${
                   msg.sender === "user"
-                    ? "bg-blue-500 text-white rounded-2xl rounded-tr-sm"
+                    ? "bg-black text-white rounded-2xl rounded-tr-sm"
                     : "bg-white text-gray-800 rounded-2xl rounded-tl-sm border border-gray-100"
                 }`}
               >
@@ -119,14 +135,14 @@ function BonkChatWidget() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="พิมพ์ข้อความที่นี่..."
-              className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="flex-1 px-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-black/50 text-black"
             />
             <button
               type="submit"
               disabled={!inputText.trim()}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium disabled:opacity-50"
+              className="bg-black text-white px-4 py-2 rounded-full font-medium disabled:opacity-50 justify-center"
             >
-              ส่ง
+              <Send size={20}/>
             </button>
           </div>
         </form>

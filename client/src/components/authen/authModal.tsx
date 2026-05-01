@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   Fingerprint,
 } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const GoogleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -28,7 +30,9 @@ const GoogleIcon = () => (
 export default function AuthModal() {
   const router = useRouter();
 
-  const [isLoginView, setIsLoginView] = useState<boolean>(true);
+  const params = useSearchParams();
+  const mode = params.get("mode");
+  const [isLoginView, setIsLoginView] = useState<boolean>(mode !== "register");
   
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,8 +106,10 @@ export default function AuthModal() {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-        * { font-family: 'Work Sans', sans-serif !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+        * { font-family: 'Work Sans', 'Noto Sans Thai' !important; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
       `,
         }}
       />
@@ -122,12 +128,12 @@ export default function AuthModal() {
             <div>
               <img src="picture/logo.png" alt="Logo" className="w-10 h-10" />
             </div>
-            <span className="text-white text-xl font-bold uppercase tracking-tight">
+            <span className="text-white text-xl font-bold uppercase tracking-tight italic">
               Portfolio Visualizer
             </span>
           </div>
 
-          <div className="relative z-10">
+          <div className="relative z-10 italic">
             <h1 className="text-5xl font-black text-white leading-[1.1] uppercase tracking-tighter mb-6">
               Precision <br />
               <span className="text-[#10B981]">Engineering</span> <br />
@@ -164,19 +170,19 @@ export default function AuthModal() {
         {/* Right Side: Auth Form */}
         <div className="p-8 lg:p-16 flex flex-col justify-center bg-white relative">
           
-          <button className="flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-black uppercase tracking-[0.2em] mb-10 w-fit transition-all group">
+          <Link href="/landing"><div className="cursor-pointer flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-black uppercase tracking-[0.2em] mb-10 w-fit transition-all group">
             <ChevronLeft
               size={14}
               className="group-hover:-translate-x-1 transition-transform"
             />
             ย้อนกลับไปหน้าแรก
-          </button>
-
+          </div>
+          </Link>
           <div className="mb-8">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter italic uppercase mb-2">
+            <h2 className="text-3xl font-black text-slate-900 tracking-widest  uppercase mb-2">
               {isLoginView ? "Welcome Back" : "Get The Edge"}
             </h2>
-            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] italic">
+            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] ">
               {isLoginView 
                 ? "ลงชื่อเข้าใช้เพื่อจัดการกลยุทธ์ของคุณ" 
                 : "สมัครสมาชิกเพื่อเริ่มใช้ระบบจำลองระดับ Quant"}
@@ -206,10 +212,10 @@ export default function AuthModal() {
                   />
                   <input
                     type="text"
-                    placeholder="Full Name"
+                    placeholder="ex:apichet portfolio"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-semibold transition-all placeholder:text-slate-300"
+                    className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-medium transition-all placeholder:text-slate-300"
                     required={!isLoginView} // บังคับกรอกเฉพาะหน้าสมัคร
                   />
                 </div>
@@ -227,10 +233,10 @@ export default function AuthModal() {
                 />
                 <input
                   type="email"
-                  placeholder="Email Address"
+                  placeholder="ex:portfolio@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-semibold transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-medium transition-all placeholder:text-slate-300"
                   required
                 />
               </div>
@@ -245,7 +251,7 @@ export default function AuthModal() {
                 {isLoginView && (
                   <button
                     type="button"
-                    className="text-[10px] font-bold text-slate-400 hover:text-black uppercase tracking-tighter"
+                    className="underline cursor-pointer text-[10px] font-regular text-slate-400 hover:text-black  tracking-tighter"
                   >
                     Forgot Key?
                   </button>
@@ -277,7 +283,7 @@ export default function AuthModal() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-black text-white rounded-[10px] font-bold uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3 mt-6 group disabled:opacity-70"
+              className="cursor-pointer w-full py-4 bg-black text-white rounded-[10px] font-bold uppercase text-[11px] tracking-[0.2em] shadow-xl hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center justify-center gap-3 mt-6 group disabled:opacity-70"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
@@ -304,7 +310,7 @@ export default function AuthModal() {
 
             <button
               onClick={handleAuthWithGoogle}
-              className="h-10 w-full flex items-center justify-center  border border-slate-100 rounded-[10px] hover:bg-slate-50 transition-all font-bold text-[10px] uppercase tracking-widest text-slate-600 italic"
+              className="cursor-pointer h-10 w-full flex items-center justify-center  border border-slate-100 rounded-[10px] hover:bg-slate-50 transition-all font-bold text-[10px] uppercase tracking-widest text-slate-600 italic"
             >
               <GoogleIcon /> Sign in with Google
             </button>
@@ -318,7 +324,7 @@ export default function AuthModal() {
                 setIsLoginView(!isLoginView); // สลับหน้า
                 setMessage(null); // เคลียร์ข้อความแจ้งเตือนเก่าทิ้ง
               }}
-              className="text-[11px] font-bold text-slate-400 hover:text-black transition-all uppercase tracking-widest"
+              className="cursor-pointer text-[11px] font-bold text-slate-400 hover:text-black transition-all uppercase tracking-widest"
             >
               {isLoginView ? "Need access? " : "Already authenticated? "}
               <span className="text-black font-black underline underline-offset-4 decoration-[#10B981] decoration-2">

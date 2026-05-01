@@ -6,7 +6,7 @@ from typing import List, Dict
 
 from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import train_test_split
 import pickle
@@ -22,16 +22,17 @@ class ClassifyModel:
         ใช้ สำหรับกำหนดค่า parameter 
         """
         self.vectorizer = TfidfVectorizer()
-        self.model = MultinomialNB()
+        self.model = LogisticRegression(random_state=42)
         self.is_loaded = False
         
     def load(self):
         """
         โหลดโมเดลที่เซฟไว้ขึ้นมา
         """
-        base_dir = os.path.dirname(__file__)
-        model_path = os.path.join(base_dir, 'model_class.pkl')
-        vec_path = os.path.join(base_dir, 'vectorizer.pkl')
+        # ชี้ไปที่โฟลเดอร์ models/ ที่อยู่ระดับเดียวกับ src/
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        model_path = os.path.join(base_dir, 'models', 'model_class.pkl')
+        vec_path = os.path.join(base_dir, 'models', 'vectorizer.pkl')
         if os.path.exists(model_path) and os.path.exists(vec_path):
             with open(model_path, 'rb') as f:
                 self.model = pickle.load(f)
@@ -48,15 +49,17 @@ class ClassifyModel:
         x_vec = self.vectorizer.fit_transform(x)
         self.model.fit(x_vec, y)
         
-        # เซฟโมเดลไว้ให้ function.py เรียกใช้
-        base_dir = os.path.dirname(__file__)
-        with open(os.path.join(base_dir, 'model_class.pkl'), 'wb') as f:
+        # เซฟโมเดลไปที่โฟลเดอร์ models/
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        models_dir = os.path.join(base_dir, 'models')
+        os.makedirs(models_dir, exist_ok=True)
+        with open(os.path.join(models_dir, 'model_class.pkl'), 'wb') as f:
             pickle.dump(self.model, f)
-        with open(os.path.join(base_dir, 'vectorizer.pkl'), 'wb') as f:
+        with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
             pickle.dump(self.vectorizer, f)
             
 
-    def evalute(self, x_test):
+    def evaluate(self, x_test):
         """
         ใช้สำหรับ test model
         """
@@ -83,13 +86,28 @@ class ClassifyModel:
     
     def saveModel(self):
         """
-        เซฟโมเดลไว้ให้ function.py เรียกใช้
+        เซฟโมเดลไปที่โฟลเดอร์ models/
         """
-        base_dir = os.path.dirname(__file__)
-        with open(os.path.join(base_dir, 'model_class.pkl'), 'wb') as f:
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        models_dir = os.path.join(base_dir, 'models')
+        os.makedirs(models_dir, exist_ok=True)
+        with open(os.path.join(models_dir, 'model_class.pkl'), 'wb') as f:
             pickle.dump(self.model, f)
-        with open(os.path.join(base_dir, 'vectorizer.pkl'), 'wb') as f:
+        with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
             pickle.dump(self.vectorizer, f)
+
+    def predictScore(self, text: str):
+        if not self.is_loaded:
+            self.load()
+        from feature.feature import FeatureEngineer
+        fe = FeatureEngineer()
+        clean_text = fe.clean_text(text)
+        x_vec = self.vectorizer.transform([clean_text])
+        prob = self.model.predict_proba(x_vec)[0] 
+        prediction = self.model.predict(x_vec)[0]
+        confidence = max(prob) 
+        return prediction, confidence
+
  
     
     

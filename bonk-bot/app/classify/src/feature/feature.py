@@ -18,7 +18,10 @@ from sklearn.impute import SimpleImputer
 
 class FeatureEngineer:
     def __init__(self):
-        pass
+        # สร้างตัวช่วย (Transformers) เตรียมไว้
+        self.imputer = SimpleImputer(strategy='most_frequent')
+        self.scaler = StandardScaler()
+        self.label_encoder = LabelEncoder()
         
     def clean_text(self, text: str) -> str:
         """ ทำความสะอาดข้อความแบบง่ายๆ """
@@ -29,14 +32,23 @@ class FeatureEngineer:
         text = re.sub(r'[^\w\sก-๙]', ' ', text)
         return text.strip()
     
-    def handleMissingValue():
-        pass
+    def handleMissingValue(self, df: pd.DataFrame, columns: list):
+        """ เติมค่าว่างให้กับคอลัมน์ที่ระบุ """
+        if columns:
+            df[columns] = self.imputer.fit_transform(df[columns])
+        return df
     
-    def handleScal(self):
-        pass
+    def handleScal(self, df: pd.DataFrame, columns: list):
+        """ ปรับสเกลตัวเลขให้เป็นมาตรฐาน (Standardization) """
+        if columns:
+            df[columns] = self.scaler.fit_transform(df[columns])
+        return df
     
-    def handleEncode(self):
-        pass
+    def handleEncode(self, df: pd.DataFrame, column: str):
+        """ เปลี่ยนข้อมูลหมวดหมู่ (Categorical) ในคอลัมน์เดียวให้เป็นตัวเลข """
+        if column in df.columns:
+            df[column] = self.label_encoder.fit_transform(df[column])
+        return df
     
     
 if __name__ == "__main__":

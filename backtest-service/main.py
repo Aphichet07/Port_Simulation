@@ -19,7 +19,7 @@ PYTHON_EXE = sys.executable
 # ─── Request / Response ───
 
 class BacktestRequest(BaseModel):
-    script: str                      # ชื่อไฟล์ .py หรือ inline script
+    script: str                     
     symbol: str = "AAPL"
     timeframe: str = "1d"
     start_date: Optional[str] = None

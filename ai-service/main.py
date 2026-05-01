@@ -13,7 +13,7 @@ def run_command_line_predict(ticker: str):
     result = predictor.predict(ticker)
     
     if not result["success"]:
-        print(f"❌ Error: {result['error']}")
+        print(f"Error: {result['error']}")
         return
 
     # แสดงผลสวยๆ แบบเดิม

@@ -1,56 +1,129 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
-} from 'recharts';
-import { 
-  Home, Layers, ShoppingCart, History, User, 
-  ChevronDown, Search, Activity, Code2, Play, Bot, X, Send,
+  Home, Layers, ShoppingCart, History, User, Menu, X, Bot,
   TrendingUp, RefreshCcw, Cpu, Zap, ShieldCheck, Trash2, Save, Plus
 } from 'lucide-react';
 
-const NavItem = ({ label, icon, active, onClick }) => {
-  return (
-    <button 
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+
+const NavItem = ({ label, icon, active, onClick, href }: { 
+  label: string; 
+  icon: React.ReactNode; 
+  active: boolean; 
+  onClick: () => void;
+  href?: string;
+}) => {
+  const content = (
+    <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-6 py-2.5 rounded-[8px] text-[12px] font-bold transition-all duration-300 whitespace-nowrap ${
-        active ? 'bg-white text-black shadow-2xl scale-105 italic ring-1 ring-black/5' : 'text-white/60 hover:text-white'
+      className={`flex items-center gap-3 px-6 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-300 whitespace-nowrap ${
+        active ? 'bg-white text-black shadow-2xl scale-105 ring-1 ring-black/5' : 'text-white/60 hover:text-white'
       }`}
     >
-      {icon} <span className="uppercase tracking-tight">{label}</span>
-    </button>
+      {icon}
+      <span className="tracking-tight">{label}</span>
+    </div>
   );
+
+  return href ? <Link href={href}>{content}</Link> : content;
 };
 
-export const AppHeader = ({ activeTab, setActiveTab }) => {
-  
+export const AppHeader = ({ setActiveTab = () => {} }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = (href: string) => {
+    router.push(href);
+    setMenuOpen(false);
+  };
+
+  const navItems = [
+    { label: 'Home',                      icon: <Home size={18}/>,         path: '/overview' },
+    { label: 'My Portfolio & Allocation', icon: <Layers size={18}/>,       path: '/my-port' },
+    { label: 'Simulate Portfolio',        icon: <ShoppingCart size={18}/>, path: '/simulate' },
+    { label: 'Transaction Logs',          icon: <History size={18}/>,      path: '/transaction' },
+  ];
 
   return (
-  <header className="h-[90px] px-4 lg:px-8 flex items-center justify-between shrink-0">
-    <div className="flex items-center gap-4">
-      <div className="  cursor-pointer transition-transform hover:scale-110 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-         <img src="picture/logo.png" alt="Logo" className="w-14 h-14"/>
-      </div>
-      <span className="text-xl font-medium tracking-tight  hidden sm:inline ">Portfolio Visualizer</span>
-    </div>
+    <>
+      <header className="h-17.5 md:h-22.5 px-3 md:px-4 lg:px-8 flex items-center justify-between shrink-0 gap-2 relative z-100">
+        
+        {/* Logo */}
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          <Link href="/overview">
+            <div className="cursor-pointer transition-transform hover:scale-110">
+              <img src="picture/logo.png" alt="Logo" className="w-10 h-10 md:w-14 md:h-14"/>
+            </div>
+          </Link>
+          <span className="text-base md:text-xl font-medium tracking-tight hidden lg:inline">Portfolio Visualizer</span>
+        </div>
 
-    <nav className="flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl overflow-x-auto no-scrollbar max-w-[50%] lg:max-w-none">
-      <NavItem label="Home" icon={<Home size={18}/>} active={activeTab === 'Home'} onClick={() => setActiveTab('Home')} />
-      <NavItem label="My Portfolio & Allocation" icon={<Layers size={18}/>} active={activeTab === 'Portfolio'} onClick={() => setActiveTab('Portfolio')} />
-      <NavItem label="Simulate Portfolio" icon={<ShoppingCart size={18}/>} active={activeTab === 'Simulate'} onClick={() => setActiveTab('Simulate')} />
-      <NavItem label="Transaction Logs" icon={<History size={18}/>} active={activeTab === 'Logs'} onClick={() => setActiveTab('Logs')} />
-    </nav>
+        {/* Desktop Nav */}
+        <nav className="cursor-pointer hidden xl:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl gap-1 xl:gap-3">
+          {navItems.map(item => (
+            <NavItem
+              key={item.path}
+              label={item.label}
+              icon={item.icon}
+              active={pathname === item.path}
+              onClick={() => navigate(item.path)}
+            />
+          ))}
+        </nav>
 
-    <div className="flex items-center gap-4 lg:gap-6">
-      <div className="text-right hidden md:block">
-        <p className="text-xs font-black text-white leading-none mb-1 uppercase tracking-widest">Apichet Runbor</p>
-        <p className="text-[10px] text-white/40 uppercase tracking-tighter font-bold">Total Amount : 3,000 $</p>
-      </div>
-      <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center overflow-hidden border-2 border-white/10 cursor-pointer hover:ring-4 hover:ring-white/20 transition-all">
-         <User size={24} className="text-black" />
-      </div>
-    </div>
-  </header>
+        {/* Right side */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Profile */}
+          <div className="cursor-pointer hidden xl:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl">
+            <Link href="/profile">
+              <div className={`flex items-center gap-2 md:gap-3 px-1.5 md:px-2 py-1 rounded-lg transition-all duration-300 ${
+                pathname === '/profile' ? 'bg-white text-black shadow-2xl scale-105 ring-1 ring-black/5' : 'text-white/60 hover:text-white'
+              }`}>
+                <div className="w-8 h-8 md:w-11 md:h-11 rounded-full bg-black flex items-center justify-center overflow-hidden border-2 border-white/10 hover:ring-4 hover:ring-white/20 transition-all">
+                  <User size={20} className="text-white" />
+                </div>
+                <div className="text-left hidden md:block">
+                  <p className="text-sm font-medium leading-none mb-1 tracking-tight">Apichet Runbor</p>
+                  <p className="text-[11px] tracking-tighter font-bold">Total Amount : 3,000 $</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* Hamburger — mobile only */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="xl:hidden bg-black  rounded-[10px] p-2.5 text-white hover:bg-white/10 transition-all"
+          >
+            {menuOpen ? <X size={20}/> : <Menu size={20}/>}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Dropdown Menu */}
+      {menuOpen && (
+        <div className="xl:hidden absolute top-17.5 left-0 right-0 z-99 bg-black border-b border-white/10 shadow-2xl px-4 py-3 flex flex-col gap-1">
+          {navItems.map(item => (
+            <NavItem
+              key={item.path}
+              label={item.label}
+              icon={item.icon}
+              active={pathname === item.path}
+              onClick={() => navigate(item.path)}
+            />
+          ))}
+          <NavItem
+            label="Profile"
+            icon={<User size={18}/>}
+            active={pathname === '/profile'}
+            onClick={() => navigate('/profile')}
+          />
+        </div>
+      )}
+    </>
   );
 };

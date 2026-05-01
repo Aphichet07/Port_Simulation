@@ -1,0 +1,20 @@
+# Environments
+venv/
+env/
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data
+# เราควรเก็บไฟล์ data/raw/dataset.csv ไว้บน Git เพราะเป็นต้นฉบับ
+# แต่ไฟล์ข้างล่างนี้ถูกสร้างขึ้นมาใหม่ได้ตลอด เลยควร Ignore ครับ
+data/process/cleanData.csv
+
+# Models
+# หมายเหตุ: ถ้าคุณต้องการให้บอทรันบน Server ได้เลยโดยไม่ต้องเทรนใหม่ ไม่ต้อง Ignore โฟลเดอร์ models ครับ
+# แต่ถ้าโมเดลไฟล์ใหญ่มาก ให้เอาเครื่องหมาย # ข้างหน้าบรรทัดล่างออก
+# models/*.pkl

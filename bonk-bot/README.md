@@ -33,3 +33,6 @@ bonk-bot/
 ├── requirements.txt            # ไฟล์รวม Library ที่ต้องใช้ (หรือใช้ pyproject.toml ถ้าใช้ Poetry/UV)
 └── README.md
 ```
+
+
+

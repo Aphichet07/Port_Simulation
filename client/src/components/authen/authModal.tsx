@@ -48,7 +48,7 @@ export default function AuthModal() {
     setMessage(null);
 
     try {
-      const res = await axios.post(`http://localhost:8000/auth/login`, { email, password });
+      const res = await axios.post(`http://localhost:7000/auth/login`, { email, password });
       const data = res.data;
       
       setMessage({ type: "success", text: "เข้าสู่ระบบสำเร็จ!" });
@@ -74,7 +74,7 @@ export default function AuthModal() {
     setMessage(null);
 
     try {
-      await axios.post(`http://localhost:8000/auth/register`, { email, password, username });
+      await axios.post(`http://localhost:7000/auth/register`, { email, password, username });
       setMessage({ type: "success", text: "สมัครสมาชิกสำเร็จ! กำลังพาไปหน้าเข้าสู่ระบบ..." });
 
       setTimeout(() => {
@@ -94,7 +94,7 @@ export default function AuthModal() {
 
   const handleAuthWithGoogle = (e: React.FormEvent) => {
     e.preventDefault();
-    window.location.href = `http://localhost:8000/auth/google`;
+    window.location.href = `http://localhost:7000/auth/google`;
   };
 
   return (
@@ -122,18 +122,18 @@ export default function AuthModal() {
             <div>
               <img src="picture/logo.png" alt="Logo" className="w-10 h-10" />
             </div>
-            <span className="text-white text-xl font-bold uppercase italic tracking-tight">
+            <span className="text-white text-xl font-bold uppercase tracking-tight">
               Portfolio Visualizer
             </span>
           </div>
 
           <div className="relative z-10">
-            <h1 className="text-5xl font-black text-white leading-[1.1] italic uppercase tracking-tighter mb-6">
+            <h1 className="text-5xl font-black text-white leading-[1.1] uppercase tracking-tighter mb-6">
               Precision <br />
               <span className="text-[#10B981]">Engineering</span> <br />
               for wealth.
             </h1>
-            <p className="text-slate-400 text-sm font-medium max-w-sm leading-relaxed mb-8 italic">
+            <p className="text-slate-400 text-sm font-medium max-w-sm leading-relaxed mb-8 ">
               "ก้าวสู่โลกแห่งการวิเคราะห์ข้อมูลเชิงปริมาณระดับสถาบัน
               ด้วยระบบจำลองพอร์ตที่รวดเร็วและแม่นยำที่สุด"
             </p>

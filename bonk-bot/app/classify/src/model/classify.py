@@ -9,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.model_selection import train_test_split
+from catboost import CatBoostClassifier
 import pickle
 
 """
@@ -21,42 +22,42 @@ class ClassifyModel:
         """
         ใช้ สำหรับกำหนดค่า parameter 
         """
-        self.vectorizer = TfidfVectorizer()
-        self.model = LogisticRegression(random_state=42)
+        # ใช้ char_wb เพื่ออ่านเป็นกลุ่มตัวอักษรแก้ปัญหาคำพิมพ์ผิด, min_df=2 ตัดคำแปลกๆ ทิ้ง, max_df=0.9 ตัดคำเกร่อๆ ทิ้ง
+        self.vectorizer = TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 4), min_df=2, max_df=0.9)
+        self.model = CatBoostClassifier(iterations=300, learning_rate=0.1, depth=6, verbose=False, random_state=42)
         self.is_loaded = False
+        
+        # ตั้งค่า Path สำหรับเซฟ/โหลดโมเดล
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        self.models_dir = os.path.join(self.base_dir, 'models')
+        self.model_path = os.path.join(self.models_dir, 'model_class.pkl')
+        self.vec_path = os.path.join(self.models_dir, 'vectorizer.pkl')
         
     def load(self):
         """
         โหลดโมเดลที่เซฟไว้ขึ้นมา
         """
-        # ชี้ไปที่โฟลเดอร์ models/ ที่อยู่ระดับเดียวกับ src/
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        model_path = os.path.join(base_dir, 'models', 'model_class.pkl')
-        vec_path = os.path.join(base_dir, 'models', 'vectorizer.pkl')
-        if os.path.exists(model_path) and os.path.exists(vec_path):
-            with open(model_path, 'rb') as f:
+        if os.path.exists(self.model_path) and os.path.exists(self.vec_path):
+            with open(self.model_path, 'rb') as f:
                 self.model = pickle.load(f)
-            with open(vec_path, 'rb') as f:
+            with open(self.vec_path, 'rb') as f:
                 self.vectorizer = pickle.load(f)
             self.is_loaded = True
         else:
             print("Can't find model.")
     def train(self, x, y):
         """
-        ใช้ train model
+        ใช้ train model ด้วย CatBoost
         """
-        # แปลง Text เป็นตัวเลขก่อน
+        # แปลง Text เป็นตัวเลข
         x_vec = self.vectorizer.fit_transform(x)
-        self.model.fit(x_vec, y)
         
-        # เซฟโมเดลไปที่โฟลเดอร์ models/
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        models_dir = os.path.join(base_dir, 'models')
-        os.makedirs(models_dir, exist_ok=True)
-        with open(os.path.join(models_dir, 'model_class.pkl'), 'wb') as f:
-            pickle.dump(self.model, f)
-        with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
-            pickle.dump(self.vectorizer, f)
+        print("Trainning...")
+        self.model.fit(x_vec, y)
+        print("Trainning completed! Model is ready to use")
+        
+        # เซฟโมเดล
+        self.saveModel()
             
 
     def evaluate(self, x_test):
@@ -66,14 +67,14 @@ class ClassifyModel:
         x_vec = self.vectorizer.transform(x_test)
         return self.model.predict(x_vec)
         
-    def predict(self, text: str) -> int:
+    def predict(self, clean_text: str) -> int:
         """
-        รับข้อความ 1 ประโยค แล้วทำนายเป็น 0 หรือ 1
+        รับข้อความที่ผ่านการ Clean แล้ว 1 ประโยค แล้วทำนายเป็น 0 หรือ 1
         """
         if not self.is_loaded:
             self.load()
             
-        x_vec = self.vectorizer.transform([text])
+        x_vec = self.vectorizer.transform([clean_text])
         prediction = self.model.predict(x_vec)
         return int(prediction[0])
     
@@ -88,25 +89,24 @@ class ClassifyModel:
         """
         เซฟโมเดลไปที่โฟลเดอร์ models/
         """
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        models_dir = os.path.join(base_dir, 'models')
-        os.makedirs(models_dir, exist_ok=True)
-        with open(os.path.join(models_dir, 'model_class.pkl'), 'wb') as f:
+        os.makedirs(self.models_dir, exist_ok=True)
+        with open(self.model_path, 'wb') as f:
             pickle.dump(self.model, f)
-        with open(os.path.join(models_dir, 'vectorizer.pkl'), 'wb') as f:
+        with open(self.vec_path, 'wb') as f:
             pickle.dump(self.vectorizer, f)
 
-    def predictScore(self, text: str):
+    def predictScore(self, clean_text: str):
+        """
+        รับข้อความที่ผ่านการ Clean แล้ว ทำนายผลพร้อมคืนค่าความมั่นใจ (Confidence Score)
+        """
         if not self.is_loaded:
             self.load()
-        from feature.feature import FeatureEngineer
-        fe = FeatureEngineer()
-        clean_text = fe.clean_text(text)
+            
         x_vec = self.vectorizer.transform([clean_text])
         prob = self.model.predict_proba(x_vec)[0] 
         prediction = self.model.predict(x_vec)[0]
         confidence = max(prob) 
-        return prediction, confidence
+        return int(prediction), float(confidence)
 
  
     

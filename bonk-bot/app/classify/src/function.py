@@ -26,8 +26,8 @@ class ClassifyFunction:
         # 1. คลีนข้อความก่อน
         clean_msg = self.feature.clean_text(text)
 
-        # 2. ส่งเข้าโมเดลเพื่อทำนาย (โมเดลรับ string เดียว คืน int 0/1 เลย)
-        result, score = self.classifier.predictScore(text)
+        # 2. ส่งเข้าโมเดลเพื่อทำนาย
+        result, score = self.classifier.predictScore(clean_msg)
 
         return int(result), float(score)
 

@@ -14,14 +14,13 @@ from sklearn.impute import SimpleImputer
 ผลลัพธ์สุดท้ายต้อง export เป็นไฟล์ csv ในโฟลเดอร์ data/processed
 """
 
-
-
 class FeatureEngineer:
     def __init__(self):
-        # สร้างตัวช่วย (Transformers) เตรียมไว้
         self.imputer = SimpleImputer(strategy='most_frequent')
+        # ปรับสเกล
         self.scaler = StandardScaler()
-        self.label_encoder = LabelEncoder()
+        # แปลงข้อมูลเป็นตัวเลข
+        self.encoder = LabelEncoder()
         
     def clean_text(self, text: str) -> str:
         """ ทำความสะอาดข้อความแบบง่ายๆ """
@@ -32,25 +31,22 @@ class FeatureEngineer:
         text = re.sub(r'[^\w\sก-๙]', ' ', text)
         return text.strip()
     
-    def handleMissingValue(self, df: pd.DataFrame, columns: list):
-        """ เติมค่าว่างให้กับคอลัมน์ที่ระบุ """
-        if columns:
-            df[columns] = self.imputer.fit_transform(df[columns])
+    def handleMissingValue(self, df: pd.DataFrame, column: list):
+        "เติมคำว่างให้กับช่องว่างที่ระบุ"
+        df[column] = self.imputer.fit_transform(df[column])
         return df
     
-    def handleScal(self, df: pd.DataFrame, columns: list):
-        """ ปรับสเกลตัวเลขให้เป็นมาตรฐาน (Standardization) """
-        if columns:
-            df[columns] = self.scaler.fit_transform(df[columns])
+    def handleScale(self, df: pd.DataFrame, column: list):
+        "ปรับสเกลตัวเลข"
+        df[column] = self.scaler.fit_transform(df[column])
         return df
     
-    def handleEncode(self, df: pd.DataFrame, column: str):
-        """ เปลี่ยนข้อมูลหมวดหมู่ (Categorical) ในคอลัมน์เดียวให้เป็นตัวเลข """
-        if column in df.columns:
-            df[column] = self.label_encoder.fit_transform(df[column])
+    def handleEncode(self, df: pd.DataFrame, column: list):
+        "แปลข้อมูลตัวอักษรให้เป็นตัวเลข"
+        df[column] = self.encoder.fit_transform(df[column])
         return df
     
     
 if __name__ == "__main__":
-    pass
-
+    print("Hello World")
+    

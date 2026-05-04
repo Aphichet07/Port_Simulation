@@ -22,7 +22,7 @@ const app = new Elysia()
     .get('/', () => {
         return "Quant Terminal API is online!"; 
     })
-    .listen(process.env.PORT || 8000); 
+    .listen(process.env.PORT || 7000); 
 
 console.log(`Elysia is running at http://${app.server?.hostname}:${app.server?.port}`);
 console.log(`API documentation available at http://${app.server?.hostname}:${app.server?.port}/docs`);

@@ -39,7 +39,7 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
     "/inform/:portName",
     async ({ params, set }) => {
       try {
-        const result = await PortfolioService.getAssetInPort(params.portName);
+        const result = await PortfolioService.getPortfolioDetails(params.portName);
         return { message: "Success", data: result };
       } catch (error: any) {
         set.status = 500;
@@ -49,47 +49,6 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
     {
       params: t.Object({ portName: t.String() }),
       detail: { tags: ["Portfolio"], summary: "ดึงข้อมูลสินทรัพย์ภายในพอร์ต" },
-    },
-  )
-
-  .post(
-    "/",
-    async ({ body, userId, set }) => {
-      try {
-        const port = await PortfolioService.createPortfolio(
-          userId,
-          body.port_name,
-        );
-        set.status = 201;
-        return { success: true, message: "สร้างพอร์ตโฟลิโอสำเร็จ", data: port };
-      } catch (error: any) {
-        set.status = 500;
-        return { success: false, message: error.message };
-      }
-    },
-    {
-      body: t.Object({ port_name: t.String() }),
-      detail: { tags: ["Portfolio"], summary: "สร้างพอร์ตโฟลิโอใหม่" },
-    },
-  )
-
-  .get(
-    "/:port_name",
-    async ({ params, userId, set }) => {
-      try {
-        const data = await PortfolioService.getPortfolioSummary(
-          userId,
-          params.port_name,
-        );
-        return { success: true, data };
-      } catch (error: any) {
-        set.status = 400;
-        return { success: false, error: error.message };
-      }
-    },
-    {
-      params: t.Object({ port_name: t.String() }),
-      detail: { tags: ["Portfolio"], summary: "ดึงภาพรวมพอร์ตโฟลิโอ" },
     },
   )
 
@@ -141,6 +100,7 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
   .post(
     "/create",
     async ({ userId, body, set }) => {
+      console.log("👉 Data received:", { userId: userId, body: body });
       try {
         const result = await PortfolioService.Create(
           userId,
@@ -150,6 +110,7 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
         set.status = 201;
         return { success: true, data: result };
       } catch (error: any) {
+        console.log(error.message);
         set.status = 500;
         return { message: error.message };
       }

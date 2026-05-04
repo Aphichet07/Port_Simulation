@@ -5,16 +5,14 @@ import { getFullAnalyticsAuto } from "../report/service";
 import { MarketService } from "../market/service";
 
 export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
-  "/report/:id", 
+  "/report/:id",
   async ({ params, query, set }) => {
     try {
-      const { id: portfolioId } = params; 
+      const { id: portfolioId } = params;
       const { start: startStr, end: endStr, initialCapital } = query;
 
-      //  ดึงข้อมูลสินทรัพย์และน้ำหนัก
       const rawAssets =
         await PortfolioService.getAssetsByPortfolioId(portfolioId);
-
       if (!rawAssets || rawAssets.length === 0) {
         set.status = 404;
         return { error: `ไม่พบสินทรัพย์ในพอร์ตไอดี: ${portfolioId}` };
@@ -29,12 +27,7 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
       const end = new Date(endStr);
       const capital = initialCapital ?? 10000;
 
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        set.status = 400;
-        return { error: "รูปแบบวันที่ไม่ถูกต้อง กรุณาใช้ YYYY-MM-DD" };
-      }
-
-      // (ส่งข้อมูล assets ที่มีทั้ง symbol และ weight เข้าไปคำนวณ)
+      // ประมวลผลราคา
       const backtestResult = await BacktestService.Analytic(
         assets,
         start,
@@ -42,7 +35,13 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
         capital,
       );
 
-      // ดึงราคา Benchmark (S&P 500) 
+      //คำนวณสถิติ
+      const quantitativeMetrics = await BacktestService.getMetrics(
+        backtestResult,
+        capital,
+      );
+
+      // 3. ดึงราคา Benchmark
       const benchmarkPrices = await MarketService.getBenchmarkPrices(
         "^GSPC",
         start,
@@ -50,7 +49,6 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
         backtestResult.dates,
       );
 
-      // รายงานสรุปผล
       const finalReport = getFullAnalyticsAuto(
         assets,
         backtestResult,
@@ -59,7 +57,12 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
 
       return {
         success: true,
-        data: finalReport,
+        data: {
+          metrics: { ...finalReport, ...quantitativeMetrics },
+          dates: backtestResult.dates,
+          equityCurve: backtestResult.equityCurve,
+          underwaterCurve: quantitativeMetrics.underwaterCurve,
+        },
       };
     } catch (error) {
       const err = error as Error;
@@ -73,7 +76,6 @@ export const BacktestModule = new Elysia({ prefix: "/backtest" }).get(
   },
   {
     params: t.Object({
-      // เปลี่ยนเป็น Numeric เพื่อให้ Elysia แปลง string ใน URL เป็น number ให้โดยอัตโนมัติ
       id: t.Numeric({
         description: "ไอดีของพอร์ตโฟลิโอ (PK จากตาราง portfolios)",
       }),

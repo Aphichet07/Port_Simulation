@@ -61,7 +61,7 @@ export const RegisterPage = ({ onLogin }: { onLogin: () => void }) => {
     const payload = { email, password, username };
 
     try {
-      const res = await axios.post(`http://localhost:8000${endpoint}`, payload);
+      const res = await axios.post(`http://localhost:7000${endpoint}`, payload);
       const data = res.data;
 
       setMessage({

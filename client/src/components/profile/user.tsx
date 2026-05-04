@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import { AppHeader } from '../overview/header';
+import BonkChatWidget from "@/src/components/ui/bonk"
 
 // --- Constants ---
 const MAX_BALANCE = 100000;
@@ -232,14 +233,7 @@ const App = () => {
 </main>
       </div>
 
-      <div className="fixed bottom-6 right-6 lg:bottom-12 lg:right-12 z-200">
-              <button 
-                onClick={() => setIsChatOpen(!isChatOpen)}
-                className="bg-black text-white p-5 lg:p-6 rounded-full shadow-[0_30px_60px_rgba(0,0,0,0.6)] hover:scale-110 active:scale-95 border border-white/20"
-              >
-                {isChatOpen ? <X size={32}/> : <Bot size={32} />}
-              </button>
-            </div>
+      <BonkChatWidget />
           </div>
   );
 };

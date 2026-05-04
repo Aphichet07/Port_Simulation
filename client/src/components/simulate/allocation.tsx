@@ -59,15 +59,15 @@ export const Asset = () => {
     setAllocations(allocations.map(a => a.id === id ? { ...a, type } : a));
   };
 
-  return (
+   return (
     <div className="lg:col-span-4 flex flex-col gap-6">
-      <div className="bg-white rounded-[10px] border border-slate-200 p-8 shadow-sm flex flex-col h-full text-slate-900">
-        <div className="flex justify-between items-start mb-10">
+      <div className="bg-white rounded-[10px] border border-slate-200 p-4 md:p-8 shadow-sm flex flex-col h-full text-slate-900">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-6 md:mb-10">
           <div>
-            <h3 className="text-xl font-medium tracking-tight">Portfolio Allocation</h3>
-            <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">เลือกสินทรัพย์และสัดส่วนการถือครอง</p>
+            <h3 className="text-lg md:text-xl font-medium tracking-tight">Portfolio Allocation</h3>
+            <p className="text-[11px] font-regular text-slate-400 uppercase mt-1">เลือกสินทรัพย์และสัดส่วนการถือครอง</p>
           </div>
-          <button className="cursor-pointer bg-black text-white px-6 py-2 rounded-md text-[9px] font-bold uppercase flex items-center gap-1 shadow-lg mt-1.5">
+          <button className="cursor-pointer bg-black text-white px-4 md:px-6 py-2 rounded-md text-[9px] font-bold uppercase flex items-center gap-1 shadow-lg w-fit">
             <Sparkles size={12} /> AI RECOMMEND
           </button>
         </div>
@@ -116,10 +116,10 @@ export const Asset = () => {
           </button>
         </div>
 
-        {/* Summary & Save */}
-        <div className="mt-10 pt-10 border-t border-slate-100">
-          <div className="flex justify-between items-end mb-8">
-            <div className="flex-1 pr-6">
+           {/* Summary & Save */}
+        <div className="mt-6 md:mt-10 pt-6 md:pt-10 border-t border-slate-100">
+          <div className="flex justify-between items-end mb-6 md:mb-8">
+            <div className="flex-1 pr-4 md:pr-6">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Portfolio Identity</p>
               <input 
                 value={portfolioName}
@@ -130,7 +130,7 @@ export const Asset = () => {
             </div>
             <div className="text-right">
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Weight</p>
-              <h4 className={`text-3xl font-black tracking-tighter ${totalWeight === 100 ? 'text-[#10B981]' : 'text-rose-500'}`}>
+              <h4 className={`text-2xl md:text-3xl font-black tracking-tighter ${totalWeight === 100 ? 'text-[#10B981]' : 'text-rose-500'}`}>
                 {totalWeight} %
               </h4>
             </div>
@@ -138,7 +138,7 @@ export const Asset = () => {
 
           <button 
             disabled={totalWeight !== 100}
-            className={`w-full py-4 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-3  ${
+            className={`w-full py-3 md:py-4 rounded-lg font-bold uppercase text-xs flex items-center justify-center gap-3 ${
               totalWeight === 100 ? 'cursor-pointer bg-[#10B981] text-white hover:brightness-110 active:scale-95' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
             }`}
           >

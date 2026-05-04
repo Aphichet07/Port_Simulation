@@ -1,23 +1,39 @@
-from .model import ClassifyModel
-import numpy as np
-import pandas as pd
 import os
 import sys
-from pathlib import Path
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, base_dir)
+
+from model.classify import ClassifyModel
+from feature.feature import FeatureEngineer
 
 """
-เดี๋ยวอันนี้กุมาเขียนต่อเอง หรือจะลองดูก็ได้ เป็นหน้าเรียกใช้ 
-ฟังก์ชั่น classify จะเริ่มแรกด้วยการสร้าง object ของ model จากนั้น เอา text เข้าไปแล้วส่งออกมาเป็น 0,1
+หน้าเรียกใช้งาน (Interface Layer)
+รับข้อความดิบเข้ามา -> คลีนข้อความ -> ทำนายผลด้วยโมเดล -> คืนค่าเป็น 0 หรือ 1
+  0 = คุยทั่วไป
+  1 = เกี่ยวกับหุ้น
 """
 
 
 class ClassifyFunction:
     def __init__(self):
-        pass
-    
-    def classify(self):
-        pass
-    
-    
+        self.feature = FeatureEngineer()
+        self.classifier = ClassifyModel()
+        self.classifier.load()
+
+    def classify(self, text: str) -> int:
+        """รับข้อความดิบ -> คืนค่า 0 หรือ 1"""
+        # 1. คลีนข้อความก่อน
+        clean_msg = self.feature.clean_text(text)
+
+        # 2. ส่งเข้าโมเดลเพื่อทำนาย
+        result, score = self.classifier.predictScore(clean_msg)
+
+        return int(result), float(score)
+
+
 if __name__ == "__main__":
-    print("Hello")
+    clf = ClassifyFunction()
+
+    print("ทดสอบ: 'PTT น่าซื้อมั้ย' ->", clf.classify("PTT น่าซื้อมั้ย"))
+    print("ทดสอบ: 'สวัสดีจ้า' ->", clf.classify("สวัสดีจ้า"))

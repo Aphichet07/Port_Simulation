@@ -83,28 +83,22 @@ export const PerformanceTable: React.FC<PerformanceTableProps> = ({
   setSelectedAssetId,
 }) => {
   return (
-    <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-6 lg:p-8 shadow-sm flex flex-col h-160 text-slate-900">
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h2 className="text-xl font-medium text-slate-800 tracking-tight">
-            Asset Class Performance
-          </h2>
-          <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">
-            ผลตอบแทนรายสินทรัพย์
-          </p>
-        </div>
+    <div className="lg:col-span-5 bg-white rounded-[10px] border border-slate-200 p-4 md:p-6 lg:p-8 shadow-sm flex flex-col h-full lg:h-160 text-slate-900">
+  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 md:mb-8">
+    <div>
+      <h2 className="text-lg md:text-xl font-medium text-slate-800 tracking-tight">Asset Class Performance</h2>
+      <p className="text-[11px] font-regular text-slate-400 uppercase mt-1">ผลตอบแทนรายสินทรัพย์</p>
+    </div>
 
         <div className="relative">
-          <button
-            onClick={() => setIsPortfolioDropdownOpen(!isPortfolioDropdownOpen)}
-            className="uppercase cursor-pointer bg-black text-white px-4 py-2 rounded-[10px] flex items-center gap-2 text-[10px] font-semibold tracking-tighter hover:bg-slate-800 transition-all shadow-md"
-          >
-            {selectedPortfolio}{" "}
-            <ChevronDown
-              size={14}
-              className={`transition-transform ${isPortfolioDropdownOpen ? "rotate-180" : ""}`}
-            />
-          </button>
+      <button
+        onClick={() => setIsPortfolioDropdownOpen(!isPortfolioDropdownOpen)}
+        className="uppercase cursor-pointer bg-black text-white px-3 md:px-4 py-2 rounded-[10px] flex items-center gap-2 text-[10px] font-semibold tracking-tighter hover:bg-slate-800 transition-all shadow-md"
+      >
+        <span className="hidden sm:inline">{selectedPortfolio}</span>
+        <span className="sm:hidden">Portfolio</span>
+        <ChevronDown size={14} className={`transition-transform ${isPortfolioDropdownOpen ? "rotate-180" : ""}`} />
+      </button>
 
           {isPortfolioDropdownOpen && (
             <>
@@ -133,43 +127,35 @@ export const PerformanceTable: React.FC<PerformanceTableProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <table className="w-full text-left min-w-100">
-          <thead className="sticky top-0 bg-white z-10">
-            <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-              <th className="pb-4 w-[40%]">Asset Class</th>
-              <th className="pb-4 text-center w-[20%]">1Y</th>
-              <th className="pb-4 text-center w-[20%]">3Y</th>
-              <th className="pb-4 text-center w-[20%]">5Y</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {MOCK_ASSETS_DATA.map((asset) => (
-              <tr
-                key={asset.id}
-                onClick={() => setSelectedAssetId(asset.id)}
-                className={`cursor-pointer transition-colors ${selectedAssetId === asset.id ? "bg-slate-100" : "hover:bg-slate-50/50"}`}
-              >
-                <td className="py-5">
-                  <p
-                    className={`text-[11px] font-medium tracking-widest uppercase ${selectedAssetId === asset.id ? "text-black font-bold" : "text-slate-500"}`}
-                  >
-                    {asset.name}
-                  </p>
-                </td>
-                <td className="py-5 text-center">
-                  <Badge val={asset.y1} status={asset.status} index={0} />
-                </td>
-                <td className="py-5 text-center">
-                  <Badge val={asset.y3} status={asset.status} index={1} />
-                </td>
-                <td className="py-5 text-center">
-                  <Badge val={asset.y5} status={asset.status} index={2} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <table className="w-full text-left">
+      <thead className="sticky top-0 bg-white z-10">
+        <tr className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
+          <th className="pb-3 md:pb-4 w-[40%]">Asset Class</th>
+          <th className="pb-3 md:pb-4 text-center w-[20%]">1Y</th>
+          <th className="pb-3 md:pb-4 text-center w-[20%]">3Y</th>
+          <th className="pb-3 md:pb-4 text-center w-[20%]">5Y</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-50">
+        {MOCK_ASSETS_DATA.map((asset) => (
+          <tr
+            key={asset.id}
+            onClick={() => setSelectedAssetId(asset.id)}
+            className={`cursor-pointer transition-colors ${selectedAssetId === asset.id ? "bg-slate-100" : "hover:bg-slate-50/50"}`}
+          >
+            <td className="py-3 md:py-5">
+              <p className={`text-[10px] md:text-[11px] font-medium tracking-widest uppercase ${selectedAssetId === asset.id ? "text-black font-bold" : "text-slate-500"}`}>
+                {asset.name}
+              </p>
+            </td>
+            <td className="py-3 md:py-5 text-center"><Badge val={asset.y1} status={asset.status} index={0} /></td>
+            <td className="py-3 md:py-5 text-center"><Badge val={asset.y3} status={asset.status} index={1} /></td>
+            <td className="py-3 md:py-5 text-center"><Badge val={asset.y5} status={asset.status} index={2} /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
     </div>
   );
 };

@@ -4,10 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { 
-  X, Bot, ChevronDown,Send
-} from 'lucide-react';
-
 interface Message {
   id: number;
   text: string;

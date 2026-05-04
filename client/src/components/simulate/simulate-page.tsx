@@ -13,6 +13,8 @@ import {
 import { AppHeader } from '../overview/header';
 import { Asset } from './allocation';
 
+import BonkChatWidget from '../ui/bonk';
+import AssetForm from '../ui/createPort';
 // --- 1. Mock Data สำหรับกราฟความเสี่ยง ---
 const RISK_DISTRIBUTION = [
   { range: '-25 %', count: 40 },
@@ -100,8 +102,8 @@ export const SimulateView = () => {
                </div>
             </div>
 
-            <Asset />
-            
+            {/* <Asset /> */}
+            <AssetForm/>
 
           </div>
 
@@ -109,12 +111,7 @@ export const SimulateView = () => {
       </div>
 
       {/* Floating Chatbot */}
-      <div className="fixed bottom-10 right-10 z-200">
-        <button className="bg-black text-white p-5 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:scale-110 active:scale-95 transition-all border border-white/10 group relative">
-          <Bot size={28} />
-          <div className="absolute inset-0 bg-[#B5F28B]/20 rounded-full animate-ping pointer-events-none"></div>
-        </button>
-      </div>
+      <BonkChatWidget/>
     </div>
   );
 };

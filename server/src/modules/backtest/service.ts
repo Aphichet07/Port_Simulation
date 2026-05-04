@@ -1,11 +1,11 @@
-import yahooFinance from 'yahoo-finance2';
-import { portfolios } from '../../db/schema/portfolios';
-import { portfolioAssets } from '../../db/schema/portfolio_asset';
-import { MarketService } from '../market/service';
-import { QuantService } from './../../common/utils/quantService';
+import yahooFinance from "yahoo-finance2";
+import { portfolios } from "../../db/schema/portfolios";
+import { portfolioAssets } from "../../db/schema/portfolio_asset";
+import { MarketService } from "../market/service";
+import { QuantService } from "./../../common/utils/quantService";
 export interface AssetInput {
   symbol: string;
-  weight: number; 
+  weight: number;
 }
 
 export interface HistoricalPrice {
@@ -22,7 +22,7 @@ export interface AnalyticResult {
   dates: string[];
   equityCurve: number[];
   portfolioReturns: number[];
-  prices: Record<string, number[]>; 
+  prices: Record<string, number[]>;
 }
 
 export interface PortfolioMetricsReport {
@@ -30,7 +30,9 @@ export interface PortfolioMetricsReport {
   totalReturn: number;
   cagr: number;
   annualizedReturn: number;
-  
+  winRate: number;
+  profitFactor: number;
+
   // Risk & Drawdown
   annualizedVolatility: number;
   maxDrawdown: number;
@@ -38,12 +40,16 @@ export interface PortfolioMetricsReport {
   recoveryTime: number;
   valueAtRisk: number;
   conditionalVar: number;
-  
+  calmarRatio: number;
+  ulcerIndex: number;
+
   // Risk-Adjusted Ratios
   sharpeRatio: number;
   sortinoRatio: number;
 
-  // Market Metrics (Optional: จะมีค่าต่อเมื่อส่งข้อมูล Benchmark มาด้วย)
+  underwaterCurve: number[];
+
+  // Market Metrics
   beta?: number;
   alpha?: number;
   rSquared?: number;
@@ -53,22 +59,26 @@ export interface PortfolioMetricsReport {
   downMarketCapture?: number;
 }
 
-
 export const BacktestService = {
-
-  async getDataMarket(assets: AssetInput[], startDate: Date, endDate: Date): Promise<MarketDataResult> {
+  async getDataMarket(
+    assets: AssetInput[],
+    startDate: Date,
+    endDate: Date,
+  ): Promise<MarketDataResult> {
     if (assets.length === 0) {
       throw new Error("Asset list cannot be empty");
     }
 
-    const fetchPromises = assets.map(asset => MarketService.getHistory(asset.symbol, startDate, endDate));
+    const fetchPromises = assets.map((asset) =>
+      MarketService.getHistory(asset.symbol, startDate, endDate),
+    );
     const results = await Promise.all(fetchPromises);
 
     const dateCountMap = new Map<string, number>();
 
     for (const assetData of results) {
-      if (assetData === undefined) continue; 
-      
+      if (assetData === undefined) continue;
+
       for (const item of assetData) {
         if (item.date === undefined) continue;
         const currentCount = dateCountMap.get(item.date) ?? 0;
@@ -82,14 +92,16 @@ export const BacktestService = {
       .sort(); // เรียงจากอดีต -> ปัจจุบัน
 
     if (commonDates.length === 0) {
-      throw new Error("No overlapping trading days found for the selected assets.");
+      throw new Error(
+        "No overlapping trading days found for the selected assets.",
+      );
     }
 
     const alignedPrices: Record<string, number[]> = {};
 
     assets.forEach((asset, index) => {
       const assetData = results[index];
-      if (assetData === undefined) return; 
+      if (assetData === undefined) return;
 
       const dataMap = new Map<string, number>();
       for (const item of assetData) {
@@ -110,20 +122,23 @@ export const BacktestService = {
 
     return {
       dates: commonDates,
-      prices: alignedPrices
+      prices: alignedPrices,
     };
   },
 
- 
-  async Analytic(assets: AssetInput[], startDate: Date, endDate: Date, initialCapital: number = 10000): Promise<AnalyticResult> {
-    
+  async Analytic(
+    assets: AssetInput[],
+    startDate: Date,
+    endDate: Date,
+    initialCapital: number = 10000,
+  ): Promise<AnalyticResult> {
     const totalWeight = assets.reduce((sum, a) => sum + a.weight, 0);
     if (Math.abs(totalWeight - 1) > 0.0001) {
       throw new Error("Total weight must be exactly 1.");
     }
 
     const marketData = await this.getDataMarket(assets, startDate, endDate);
-    console.log(marketData)
+    console.log(marketData);
     const totalDays = marketData.dates.length;
 
     if (totalDays === 0) {
@@ -133,7 +148,7 @@ export const BacktestService = {
     const assetUnits: Record<string, number> = {};
     for (const asset of assets) {
       const prices = marketData.prices[asset.symbol];
-      if (prices === undefined) continue; 
+      if (prices === undefined) continue;
       const firstPrice = prices[0];
       if (firstPrice === undefined || firstPrice === 0) {
         throw new Error(`Invalid initial price for ${asset.symbol}`);
@@ -144,20 +159,20 @@ export const BacktestService = {
     }
 
     const equityCurve: number[] = [];
-    
+
     for (let day = 0; day < totalDays; day++) {
       let dailyTotalValue = 0;
 
       for (const asset of assets) {
         const units = assetUnits[asset.symbol] ?? 0;
         const prices = marketData.prices[asset.symbol];
-        
-        if (prices === undefined) continue; 
-        const currentPrice = prices[day] ?? 0; 
-        
+
+        if (prices === undefined) continue;
+        const currentPrice = prices[day] ?? 0;
+
         dailyTotalValue += units * currentPrice;
       }
-      
+
       equityCurve.push(dailyTotalValue);
     }
 
@@ -165,9 +180,10 @@ export const BacktestService = {
     for (let i = 1; i < equityCurve.length; i++) {
       const currentVal = equityCurve[i];
       const prevVal = equityCurve[i - 1];
-      
-      if (currentVal === undefined || prevVal === undefined || prevVal === 0) continue; 
-      
+
+      if (currentVal === undefined || prevVal === undefined || prevVal === 0)
+        continue;
+
       portfolioReturns.push((currentVal - prevVal) / prevVal);
     }
 
@@ -175,7 +191,72 @@ export const BacktestService = {
       dates: marketData.dates,
       equityCurve,
       portfolioReturns,
-      prices: marketData.prices
+      prices: marketData.prices,
     };
-  }
+  },
+  async getMetrics(
+    analyticResult: AnalyticResult,
+    initialCapital: number,
+  ): Promise<PortfolioMetricsReport> {
+    const { equityCurve, portfolioReturns } = analyticResult;
+    const finalValue = equityCurve[equityCurve.length - 1] ?? initialCapital;
+    const totalDays = equityCurve.length;
+
+    const report: PortfolioMetricsReport = {
+      totalReturn: QuantService.calculateTotalReturn(
+        initialCapital,
+        finalValue,
+      ),
+      cagr: QuantService.calculateCAGR(initialCapital, finalValue, totalDays),
+      annualizedReturn:
+        QuantService.calculateAnnualizedReturn(portfolioReturns),
+      winRate: QuantService.calculateWinRate(portfolioReturns),
+      profitFactor: QuantService.calculateProfitFactor(portfolioReturns),
+
+      annualizedVolatility:
+        QuantService.calculateAnnualizedVolatility(portfolioReturns),
+      maxDrawdown: QuantService.calculateMaximumDrawDown(equityCurve),
+      drawdownDuration: QuantService.calculateDrawDownDuration(equityCurve),
+      recoveryTime: QuantService.calculateRecoverTime(equityCurve),
+      valueAtRisk: QuantService.calculateValueAtRisk(portfolioReturns),
+      conditionalVar: QuantService.calculateConditionalVar(portfolioReturns),
+      calmarRatio: QuantService.calculateCalmarRatio(
+        initialCapital,
+        finalValue,
+        totalDays,
+        equityCurve,
+      ),
+      ulcerIndex: QuantService.calculateUlcerIndex(equityCurve),
+
+      sharpeRatio: QuantService.calculateSharpeRatio(portfolioReturns),
+      sortinoRatio: QuantService.calculateSortinoRatio(portfolioReturns),
+
+      underwaterCurve: QuantService.getUnderwaterCurve(equityCurve),
+    };
+
+    return report;
+  },
+  async runFullBacktest(
+    assets: AssetInput[],
+    startDate: Date,
+    endDate: Date,
+    initialCapital: number,
+  ) {
+    const analyticData = await this.Analytic(
+      assets,
+      startDate,
+      endDate,
+      initialCapital,
+    );
+
+    const metrics = await this.getMetrics(analyticData, initialCapital);
+
+    return {
+      success: true,
+      data: {
+        analytic: analyticData,
+        metrics: metrics,
+      },
+    };
+  },
 };

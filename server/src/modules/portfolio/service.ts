@@ -363,18 +363,21 @@ export const PortfolioService = {
     });
   },
 
-  async getAssetInPort(portName: string) {
-    const result = await db
-      .select({
-        symbol: assets.symbol,
-      })
-      .from(portfolios)
-      .innerJoin(
-        portfolioAssets,
-        eq(portfolios.id, portfolioAssets.portfolioId),
-      )
-      .innerJoin(assets, eq(portfolioAssets.assetId, assets.id));
+async getPortfolioDetails(portName: string) {
+  const result = await db
+    .select({
+      portfolio: portfolios, 
+      weight: portfolioAssets.weight, 
+      asset: assets, 
+    })
+    .from(portfolios)
+    .innerJoin(
+      portfolioAssets,
+      eq(portfolios.id, portfolioAssets.portfolioId),
+    )
+    .innerJoin(assets, eq(portfolioAssets.assetId, assets.id))
+    .where(eq(portfolios.port_name, portName)); 
 
-    return result;
-  },
+  return result;
+}
 };

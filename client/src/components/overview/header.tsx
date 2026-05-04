@@ -45,7 +45,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
     { label: 'Home',                      icon: <Home size={18}/>,         path: '/overview' },
     { label: 'My Portfolio & Allocation', icon: <Layers size={18}/>,       path: '/my-port' },
     { label: 'Simulate Portfolio',        icon: <ShoppingCart size={18}/>, path: '/simulate' },
-    { label: 'Transaction Logs',          icon: <History size={18}/>,      path: '/transaction' },
+    // { label: 'Transaction Logs',          icon: <History size={18}/>,      path: '/transaction' },
   ];
 
   return (

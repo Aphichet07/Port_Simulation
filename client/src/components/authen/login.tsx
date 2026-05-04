@@ -63,7 +63,7 @@ export const LoginPage = ({ onRegister }: { onRegister: () => void }) => {
     setIsLoading(true);
 
     try {
-      const res = await axios.post(`http://localhost:8000${endpoint}`, payload);
+      const res = await axios.post(`http://localhost:7000${endpoint}`, payload);
       const data = res.data;
       console.log("data --> ", data);
       setMessage({ type: "success", text: "เข้าสู่ระบบสำเร็จ!" });

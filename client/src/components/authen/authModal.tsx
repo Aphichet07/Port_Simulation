@@ -54,9 +54,10 @@ export default function AuthModal() {
       setMessage({ type: "success", text: "เข้าสู่ระบบสำเร็จ!" });
       const tokenToSave = data.access_token || data.token || data;
       Cookies.set("token", tokenToSave, { expires: 1, path: "/" });
+      localStorage.setItem("token", tokenToSave);
 
       setTimeout(() => {
-        router.push("/test");
+        router.push("/overview");
       }, 1000);
     } catch (error: any) {
       setMessage({

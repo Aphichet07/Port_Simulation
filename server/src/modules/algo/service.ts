@@ -52,7 +52,7 @@ async function deployDockerBot(params: {
     name: `bot-${botId}`,
     Env: [
       `BOT_ID=${botId}`,
-      `API_URL=http://host.docker.internal:${process.env.PORT || 8000}`,
+      `API_URL=http://host.docker.internal:${process.env.PORT || 7000}`,
       `API_TOKEN=${params.token}`,
     ],
     HostConfig: {

@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendActivationEmail = async (email: string, token: string) => {
-  const activationUrl = `http://localhost:8000/auth/activate?token=${token}`;
+  const activationUrl = `http://localhost:7000/auth/activate?token=${token}`;
 
   await resend.emails.send({
     from: 'QuantTerminal <onboarding@resend.dev>',

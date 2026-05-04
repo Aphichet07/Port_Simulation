@@ -8,8 +8,76 @@ const priceCache = new Map<
   { price: number; change: number; timestamp: number }
 >();
 
+interface YahooQuoteResponse {
+  quoteResponse?: {
+    result?: Array<Record<string, any>>;
+    error?: any;
+  };
+}
+
 export const MarketService = {
 
+ async getMarketOverview() {
+    const majorIndices = [
+      { symbol: "^GSPC", name: "S&P 500", type: "INDEX" },
+      { symbol: "^IXIC", name: "NASDAQ", type: "INDEX" },
+      { symbol: "^DJI", name: "Dow Jones", type: "INDEX" },
+      { symbol: "^SET.BK", name: "SET Index", type: "INDEX" },
+      { symbol: "GC=F", name: "Gold", type: "COMMODITY" },
+    ];
+
+    const symbols = majorIndices.map((idx) => idx.symbol);
+
+    try {
+      const quotes = await yahooFinance.quote(symbols);
+
+      const overviewData = majorIndices.map((indexDef) => {
+        const quote = quotes.find((q) => q.symbol === indexDef.symbol);
+
+        return {
+          // ข้อมูลพื้นฐาน 
+          symbol: indexDef.symbol,
+          name: quote?.shortName || indexDef.name, 
+          type: quote?.quoteType || indexDef.type,
+          currency: quote?.currency || "USD",
+          exchange: quote?.fullExchangeName || "Unknown",
+          marketState: quote?.marketState || "CLOSED",
+
+          // ราคาปัจจุบันและการเปลี่ยนแปลง
+          price: quote?.regularMarketPrice ?? 0,
+          change: quote?.regularMarketChange ?? 0,
+          changePercent: quote?.regularMarketChangePercent ?? 0,
+          previousClose: quote?.regularMarketPreviousClose ?? 0,
+
+          // ข้อมูลรายวันและปริมาณการซื้อขาย
+          dayHigh: quote?.regularMarketDayHigh ?? null,
+          dayLow: quote?.regularMarketDayLow ?? null,
+          volume: quote?.regularMarketVolume ?? null,
+          avgVolume3Month: quote?.averageDailyVolume3Month ?? null,
+
+          // สถิติย้อนหลัง 1 ปี
+          fiftyTwoWeekHigh: quote?.fiftyTwoWeekHigh ?? null,
+          fiftyTwoWeekLow: quote?.fiftyTwoWeekLow ?? null,
+          fiftyTwoWeekChangePercent: quote?.fiftyTwoWeekChangePercent ?? null,
+
+          // เส้นค่าเฉลี่ยทางเทคนิค
+          fiftyDayAverage: quote?.fiftyDayAverage ?? null,
+          twoHundredDayAverage: quote?.twoHundredDayAverage ?? null,
+
+          // เวลาที่อัปเดตล่าสุด
+          updatedAt: quote?.regularMarketTime 
+            ? quote.regularMarketTime.toISOString() 
+            : new Date().toISOString(),
+        };
+      });
+
+      return overviewData;
+
+    } catch (error) {
+      console.error("[MarketService] Error fetching market overview:", error);
+      throw new Error("ไม่สามารถดึงข้อมูลตลาดได้ในขณะนี้");
+    }
+  },
  async getAllAssets() {
     const allAssets = await db.select().from(assets);
     return allAssets;

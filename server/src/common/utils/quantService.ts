@@ -451,4 +451,66 @@ export class QuantService {
       return weight * (covAssetPort / portStdDev);
     });
   }
+  /**
+   * Calmar Ratio: ผลตอบแทนรายปีเทียบกับ Max Drawdown (ยิ่งสูงยิ่งดี)
+   */
+  static calculateCalmarRatio(initialValue: number, finalValue: number, totalTradingDays: number, equityCurve: number[]): number {
+    const cagr = this.calculateCAGR(initialValue, finalValue, totalTradingDays);
+    const maxDD = this.calculateMaximumDrawDown(equityCurve);
+    if (maxDD === 0) return 0;
+    return cagr / maxDD;
+  }
+
+  /**
+   * Win Rate: สัดส่วนวันที่ผลตอบแทนเป็นบวก
+   */
+  static calculateWinRate(dailyReturns: number[]): number {
+    if (dailyReturns.length === 0) return 0;
+    const wins = dailyReturns.filter(r => r > 0).length;
+    return wins / dailyReturns.length;
+  }
+
+  /**
+   * Profit Factor: สัดส่วนยอดรวมกำไร เทียบกับ ยอดรวมขาดทุน
+   */
+  static calculateProfitFactor(dailyReturns: number[]): number {
+    const grossProfit = dailyReturns.filter(r => r > 0).reduce((a, b) => a + b, 0);
+    const grossLoss = Math.abs(dailyReturns.filter(r => r < 0).reduce((a, b) => a + b, 0));
+    if (grossLoss === 0) return grossProfit > 0 ? 999 : 0;
+    return grossProfit / grossLoss;
+  }
+  /**
+   * คำนวณสายธาร Drawdown (Underwater Curve) เพื่อเอาไปพลอตกราฟ
+   * @returns Array ของ % ที่ติดลบในแต่ละวัน (เช่น [0, -0.02, -0.05, 0])
+   */
+  static getUnderwaterCurve(equityCurve: number[]): number[] {
+    if (equityCurve.length === 0) return [];
+    let peak = -Infinity;
+    return equityCurve.map(val => {
+      if (val > peak) peak = val;
+      return peak !== 0 ? (val - peak) / peak : 0;
+    });
+  }
+  /**
+   * Diversification Ratio: วัดประสิทธิภาพการกระจายความเสี่ยง
+   * สูตร: Weighted Volatility / Portfolio Volatility
+   */
+  static calculateDiversificationRatio(weights: number[], assetReturns: number[][], portfolioReturns: number[]): number {
+    const weightedVol = weights.reduce((acc, w, i) => {
+      const assetRet = assetReturns[i];
+      return acc + (w * (assetRet ? stdDev(assetRet) : 0));
+    }, 0);
+    const portVol = stdDev(portfolioReturns);
+    if (portVol === 0) return 0;
+    return weightedVol / portVol;
+  }
+  /**
+   * Ulcer Index: ยิ่งค่าน้อย แปลว่าพอร์ตฟื้นตัวเร็วและไม่จมลึก
+   */
+  static calculateUlcerIndex(equityCurve: number[]): number {
+    const drawdownCurve = this.getUnderwaterCurve(equityCurve);
+    if (drawdownCurve.length === 0) return 0;
+    const squaredDD = drawdownCurve.reduce((acc, dd) => acc + Math.pow(dd, 2), 0);
+    return Math.sqrt(squaredDD / drawdownCurve.length);
+  }
 }

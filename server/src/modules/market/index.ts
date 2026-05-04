@@ -2,6 +2,27 @@ import { Elysia, t } from "elysia";
 import { MarketService } from "./service";
 
 export const MarketModule = new Elysia({ prefix: "/market" })
+.get("/overview", async ({ set }) => {
+    try {
+      const data = await MarketService.getMarketOverview();
+      return {
+        success: true,
+        total: data.length,
+        data: data,
+      };
+    } catch (error) {
+      const err = error as Error;
+      console.error("Market Overview Error:", err.message);
+      set.status = 500;
+      return { success: false, message: "ไม่สามารถดึงข้อมูลภาพรวมตลาดได้" };
+    }
+  }, {
+    detail: {
+      tags: ["Market"],
+      summary: "ดึงข้อมูลภาพรวมตลาด (Market Overview)",
+      description: "เรียกดูข้อมูลดัชนีสำคัญรายวัน เช่น S&P500, NASDAQ, SET Index, Gold"
+    }
+  })
   // ดึงรายการสินทรัพย์ทั้งหมด
   .get("/asset", async ({ set }) => {
     try {
@@ -78,6 +99,39 @@ export const MarketModule = new Elysia({ prefix: "/market" })
       summary: "ดึงข้อมูลราคาย้อนหลัง (Historical Data)",
     }
   })
+  .post("/benchmark", async ({ body, set }) => {
+    try {
+      const data = await MarketService.getBenchmarkPrices(
+        body.symbol,
+        body.startDate,
+        body.endDate,
+        body.commonDates
+      );
+      
+      return { 
+        success: true, 
+        total: data.length,
+        data: data 
+      };
+    } catch (error) {
+      const err = error as Error;
+      set.status = 500;
+      console.error("Benchmark Fetch Error:", err.message);
+      return { success: false, message: "ไม่สามารถดึงข้อมูล Benchmark ได้" };
+    }
+  }, {
+    body: t.Object({
+      symbol: t.String({ description: "สัญลักษณ์ดัชนีชี้วัด เช่น ^GSPC (S&P500), ^SET.BK" }),
+      startDate: t.Date({ description: "วันที่เริ่มต้น (เช่น 2024-01-01T00:00:00Z)" }),
+      endDate: t.Date({ description: "วันที่สิ้นสุด (เช่น 2024-12-31T00:00:00Z)" }),
+      commonDates: t.Array(t.String(), { description: "อาเรย์ของวันที่ (YYYY-MM-DD) ที่ต้องการจับคู่ราคา" })
+    }),
+    detail: {
+      tags: ["Market"],
+      summary: "ดึงข้อมูลราคา Benchmark สำหรับเปรียบเทียบ",
+      description: "ดึงราคาปิดของดัชนีชี้วัด (Benchmark) โดยจะคืนค่าราคาเฉพาะในวันที่ตรงกับ commonDates เพื่อนำไปพล็อตกราฟเปรียบเทียบกับ Equity Curve ของพอร์ต"
+    }
+  })
 
   // WebSocket สำหรับราคาสด
   .ws("/live", {
@@ -131,4 +185,5 @@ export const MarketModule = new Elysia({ prefix: "/market" })
       tags: ["Market WebSocket"],
       summary: "WebSocket สำหรับติดตามราคา Real-time",
     }
-  });
+  }
+);

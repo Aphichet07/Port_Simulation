@@ -26,7 +26,7 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
         "profile",
         "email",
       ]);
-
+      console.log("URL : ",url)
       const cookieOptions = {
         httpOnly: true,
         maxAge: 60 * 10,
@@ -88,7 +88,7 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
         google_code_verifier.remove();
 
         const token = await jwt.sign({ userId: user.id });
-        return redirect(`http://localhost:3000/test?token=${token}`);
+        return redirect(`http://localhost:3000/overview?token=${token}`);
       } catch (error) {
         const err = error as Error;
         set.status = 500;

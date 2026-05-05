@@ -86,13 +86,13 @@ export const Myport = () => {
       const rawData = res.data?.data || [];
       const formattedData = rawData.map((item: any) => ({
         symbol: item.asset?.symbol || "Unknown",
-        weight: parseFloat(item.weight) * 100, // แปลงทศนิยมเป็น %
+        weight: parseFloat(item.weight) * 100, 
       }));
 
       setAllocationData(formattedData);
     } catch (err) {
       console.error("Failed to fetch allocation:", err);
-      setAllocationData([]); // รีเซ็ตค่าถ้าดึงพัง
+      setAllocationData([]); 
     } finally {
       setIsAllocLoading(false);
     }

@@ -100,7 +100,7 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
   .post(
     "/create",
     async ({ userId, body, set }) => {
-      console.log("👉 Data received:", { userId: userId, body: body });
+      console.log(" Data received:", { userId: userId, body: body });
       try {
         const result = await PortfolioService.Create(
           userId,
@@ -134,10 +134,10 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
   )
 
   .delete(
-    "/:port_name",
+    "/:id",
     async ({ userId, params, set }) => {
       try {
-        await PortfolioService.deletePort(userId, params.port_name);
+        await PortfolioService.deletePort(userId, params.id);
         set.status = 204;
         return;
       } catch (error: any) {
@@ -146,7 +146,7 @@ export const PortfolioModule = new Elysia({ prefix: "/portfolio" })
       }
     },
     {
-      params: t.Object({ port_name: t.String() }),
+      params: t.Object({ id: t.Number() }),
       detail: { tags: ["Portfolio"], summary: "ลบพอร์ตโฟลิโอ" },
     },
   );

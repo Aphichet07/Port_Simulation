@@ -324,7 +324,7 @@ export const PortfolioService = {
     return updatedPort;
   },
 
-  async deletePort(userId: number, port_name: string) {
+  async deletePort(userId: number, id: number) {
     return await db.transaction(async (tx) => {
       // หาพอร์ต
       const [portfolio] = await tx
@@ -333,12 +333,12 @@ export const PortfolioService = {
         .where(
           and(
             eq(portfolios.userId, userId),
-            eq(portfolios.port_name, port_name),
+            eq(portfolios.id, id),
           ),
         );
 
       if (!portfolio) {
-        throw new Error(`ไม่พบพอร์ตโฟลิโอชื่อ "${port_name}"`);
+        throw new Error(`ไม่พบพอร์ตโฟลิโอชื่อ "${id}"`);
       }
 
       //ลบพอร์ตที่ยังมีสินทรัพย์ค้างอยู่
@@ -358,7 +358,7 @@ export const PortfolioService = {
 
       return {
         success: true,
-        message: `ลบพอร์ตโฟลิโอ ${port_name} สำเร็จเรียบร้อยแล้ว`,
+        message: `ลบพอร์ตโฟลิโอ ${id} สำเร็จเรียบร้อยแล้ว`,
       };
     });
   },

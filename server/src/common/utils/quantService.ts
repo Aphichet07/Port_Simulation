@@ -513,4 +513,301 @@ export class QuantService {
     const squaredDD = drawdownCurve.reduce((acc, dd) => acc + Math.pow(dd, 2), 0);
     return Math.sqrt(squaredDD / drawdownCurve.length);
   }
+
+  /**
+   * Arithmetic Mean (Monthly) - ค่าเฉลี่ยเลขคณิตรายเดือน
+   * หมายเหตุ: สมมติว่า dailyReturns มีประมาณ 21 วันเทรดต่อเดือน
+   */
+  static calculateMonthlyArithmeticMean(dailyReturns: number[]): number {
+    return mean(dailyReturns) * 21;
+  }
+
+  /**
+   * Geometric Mean (Monthly) - ค่าเฉลี่ยเรขาคณิตรายเดือน
+   */
+  static calculateMonthlyGeometricMean(dailyReturns: number[]): number {
+    const compoundReturn = dailyReturns.reduce((acc, r) => acc * (1 + r), 1);
+    const months = dailyReturns.length / 21;
+    if (months === 0 || compoundReturn < 0) return 0;
+    return Math.pow(compoundReturn, 1 / months) - 1;
+  }
+
+  /**
+   * Downside Deviation (Standalone) - ใช้บ่อยในการวิเคราะห์แยกต่างหาก
+   * @param portReturns ผลตอบแทนรายวัน
+   * @param targetReturn ผลตอบแทนเป้าหมาย (เช่น 0)
+   */
+  static calculateDownsideDeviation(portReturns: number[], targetReturn: number = 0): number {
+    if (portReturns.length === 0) return 0;
+    const downside = portReturns.filter(r => r < targetReturn);
+    if (downside.length === 0) return 0;
+    
+    // คำนวณโดยหารด้วย N ทั้งหมดของพอร์ต (ไม่ใช่แค่ N ของ downside)
+    const sumSquared = downside.reduce((sum, r) => sum + Math.pow(r - targetReturn, 2), 0);
+    return Math.sqrt(sumSquared / portReturns.length);
+  }
+
+  /**
+   * Treynor Ratio: ผลตอบแทนเทียบกับความเสี่ยงระบบ (Beta)
+   * เหมาะสำหรับพอร์ตที่มีการกระจายความเสี่ยงดีแล้ว
+   */
+  static calculateTreynorRatio(portReturns: number[], benchReturns: number[], riskFreeRateAnnual: number = 0.03): number {
+    const annPortRet = this.calculateAnnualizedReturn(portReturns);
+    const beta = this.calculateBeta(portReturns, benchReturns);
+    if (beta === 0) return 0;
+    return (annPortRet - riskFreeRateAnnual) / beta;
+  }
+
+  /**
+   * Modigliani–Modigliani Measure (M2): 
+   * Sharpe Ratio ในรูปของผลตอบแทนเปอร์เซ็นต์ (เข้าใจง่ายกว่า Sharpe ที่เป็นตัวเลขสัมประสิทธิ์)
+   */
+  static calculateM2(portReturns: number[], benchReturns: number[], riskFreeRateAnnual: number = 0.03): number {
+    const sharpe = this.calculateSharpeRatio(portReturns, riskFreeRateAnnual);
+    const benchVol = this.calculateAnnualizedVolatility(benchReturns);
+    return (sharpe * benchVol) + riskFreeRateAnnual;
+  }
+
+  /**
+   * Skewness: ความเบ้ของการกระจายตัว
+   * ค่าลบ (Negative Skew) หมายถึงมีโอกาสขาดทุนหนักๆ ซ่อนอยู่ (Fat left tail)
+   */
+  static calculateSkewness(returns: number[]): number {
+    if (returns.length < 3) return 0;
+    const m = mean(returns);
+    const s = stdDev(returns);
+    if (s === 0) return 0;
+
+    const n = returns.length;
+    const sumCubed = returns.reduce((acc, r) => acc + Math.pow(r - m, 3), 0);
+    
+    // Adjusted Fisher-Pearson standardized moment coefficient
+    return (n * sumCubed) / ((n - 1) * (n - 2) * Math.pow(s, 3));
+  }
+
+  /**
+   * Excess Kurtosis: ความโด่งของการกระจายตัว
+   * ค่า > 0 (Leptokurtic) แปลว่ามีความเสี่ยงที่จะเกิด Extreme events บ่อยกว่าปกติ (Black Swan)
+   */
+  static calculateExcessKurtosis(returns: number[]): number {
+    if (returns.length < 4) return 0;
+    const m = mean(returns);
+    const s = stdDev(returns);
+    if (s === 0) return 0;
+
+    const n = returns.length;
+    const sumQuart = returns.reduce((acc, r) => acc + Math.pow(r - m, 4), 0);
+    
+    const kurtosis = (n * (n + 1) * sumQuart) / ((n - 1) * (n - 2) * (n - 3) * Math.pow(s, 4));
+    const excessAdjustment = (3 * Math.pow(n - 1, 2)) / ((n - 2) * (n - 3));
+    
+    return kurtosis - excessAdjustment;
+  }
+
+  /**
+   * Analytical Value at Risk (Parametric VaR)
+   * คำนวณ VaR จากสมมติฐานการแจกแจงแบบปกติ (Normal Distribution) 
+   * Z-Score สำหรับ 95% คือ 1.645
+   */
+  static calculateAnalyticalVaR(returns: number[], zScore: number = 1.645): number {
+    const m = mean(returns);
+    const s = stdDev(returns);
+    return m - (zScore * s); 
+  }
+
+  /**
+   * Active Return: ผลตอบแทนส่วนต่างจาก Benchmark สุทธิ
+   */
+  static calculateActiveReturn(portReturns: number[], benchReturns: number[]): number {
+    return this.calculateAnnualizedReturn(portReturns) - this.calculateAnnualizedReturn(benchReturns);
+  }
+
+  /**
+   * Gain/Loss Ratio: ต่างจาก Profit Factor ตรงที่ใช้อัตราส่วนของ "ค่าเฉลี่ย" ของกำไร/ขาดทุน
+   */
+  static calculateGainLossRatio(dailyReturns: number[]): number {
+    const wins = dailyReturns.filter(r => r > 0);
+    const losses = dailyReturns.filter(r => r < 0);
+    
+    if (losses.length === 0) return 999;
+    if (wins.length === 0) return 0;
+
+    const avgWin = mean(wins);
+    const avgLoss = Math.abs(mean(losses));
+    
+    return avgLoss === 0 ? 999 : avgWin / avgLoss;
+  }
+
+  static calculateAnnualizedArithmeticMean(dailyReturns: number[]): number {
+    return mean(dailyReturns) * this.TRADING_DAYS_PER_YEAR;
+  }
+
+  /**
+   * Standard Deviation (Monthly)
+   */
+  static calculateMonthlyVolatility(dailyReturns: number[]): number {
+    // สมมติฐาน: 1 เดือนมีวันเทรดประมาณ 21 วัน
+    return stdDev(dailyReturns) * Math.sqrt(21);
+  }
+
+  /**
+   * Downside Deviation (Monthly)
+   */
+  static calculateMonthlyDownsideDeviation(dailyReturns: number[], targetReturn: number = 0): number {
+    return this.calculateDownsideDeviation(dailyReturns, targetReturn) * Math.sqrt(21);
+  }
+
+  /**
+   * Positive Periods (นับจำนวนวันที่ชนะตลาด พร้อม %)
+   */
+  static getPositivePeriods(dailyReturns: number[]): { wins: number; total: number; winRate: number } {
+    if (dailyReturns.length === 0) return { wins: 0, total: 0, winRate: 0 };
+    const wins = dailyReturns.filter((r) => r > 0).length;
+    return {
+      wins,
+      total: dailyReturns.length,
+      winRate: wins / dailyReturns.length,
+    };
+  }
+
+  /**
+   * Perpetual Withdrawal Rate (PWR) 
+   * อัตราถอนเงินสูงสุดที่จะทำให้เงินต้นอยู่ครบไปตลอดกาล (ปรับอัตราเงินเฟ้อแล้ว)
+   * @param cagr อัตราผลตอบแทนทบต้นต่อปี
+   * @param inflationRate อัตราเงินเฟ้อคาดการณ์ (ค่า Default คือ 3% หรือ 0.03)
+   */
+  static calculatePerpetualWithdrawalRate(cagr: number, inflationRate: number = 0.03): number {
+    // คำนวณ Real Return (ผลตอบแทนที่แท้จริงหลังหักเงินเฟ้อ)
+    return ((1 + cagr) / (1 + inflationRate)) - 1;
+  }
+
+  /**
+   * Safe Withdrawal Rate (SWR)
+   * อัตราถอนเงินที่ปลอดภัยที่สุดโดยที่เงินจะไม่หมดพอร์ตตลอดระยะเวลาลงทุน (ตามสมการ Annuity)
+   * @param cagr อัตราผลตอบแทนทบต้นต่อปี
+   * @param years จำนวนปีที่ลงทุน
+   * @param inflationRate อัตราเงินเฟ้อคาดการณ์
+   */
+  static calculateSafeWithdrawalRate(cagr: number, years: number, inflationRate: number = 0.03): number {
+    if (years <= 0) return 0;
+    const realReturn = this.calculatePerpetualWithdrawalRate(cagr, inflationRate);
+    
+    // ถ้าผลตอบแทนแพ้เงินเฟ้อ ให้ถอนแบบหารเฉลี่ยตรงๆ ไปเลยเพื่อเซฟเงิน
+    if (realReturn <= 0) return 1 / years; 
+    
+    // สมการคำนวณ PMT แบบง่าย (Annuity Formula)
+    return realReturn / (1 - Math.pow(1 + realReturn, -years));
+  }
+
+  /**
+   * Omega Ratio: วัดผลตอบแทนส่วนที่ชนะเป้าหมาย เทียบกับส่วนที่แพ้เป้าหมาย
+   * (ดีกว่า Sharpe Ratio ตรงที่ไม่มองการพุ่งขึ้นแรงๆ เป็นความเสี่ยง)
+   * @param returns Array ของผลตอบแทน
+   * @param targetReturn เป้าหมายผลตอบแทน (ค่า Default คือ 0)
+   */
+  static calculateOmegaRatio(returns: number[], targetReturn: number = 0): number {
+    let sumWin = 0;
+    let sumLoss = 0;
+    
+    for (const r of returns) {
+      if (r > targetReturn) {
+        sumWin += (r - targetReturn);
+      } else if (r < targetReturn) {
+        sumLoss += Math.abs(targetReturn - r); // นับเฉพาะระยะที่พลาดเป้า
+      }
+    }
+    
+    if (sumLoss === 0) return 999; // ถ้าไม่เคยขาดทุนเลย ให้ค่าเป็นอนันต์ (999)
+    return sumWin / sumLoss;
+  }
+
+  /**
+   * Tail Ratio: วัดว่าเวลาพอร์ตแจ็คพอตแตก (ได้กำไรสูงสุด 5%) เทียบกับเวลาซวย (ขาดทุนหนักสุด 5%) อัตราส่วนเป็นเท่าไหร่
+   * ค่า > 1 แปลว่า Upside มากกว่า Downside
+   */
+  static calculateTailRatio(returns: number[]): number {
+    if (returns.length < 20) return 0; // ต้องมีข้อมูลมากพอ
+    
+    // เรียงลำดับผลตอบแทนจากน้อยไปมาก
+    const sorted = [...returns].sort((a, b) => a - b);
+    
+    // หาตำแหน่ง P95 (กำไรฝั่งขวา) และ P05 (ขาดทุนฝั่งซ้าย)
+    const p95Idx = Math.floor(sorted.length * 0.95);
+    const p05Idx = Math.floor(sorted.length * 0.05);
+    
+    const p95 = sorted[p95Idx] ?? 0;
+    const p05 = Math.abs(sorted[p05Idx] ?? 0);
+    
+    if (p05 === 0) return 999;
+    return p95 / p05;
+  }
+
+  /**
+   * Expectancy (ค่าความคาดหวังของพอร์ต): เทรด 1 วันโดยเฉลี่ยแล้วจะได้หรือเสียเงินเท่าไหร่
+   */
+  static calculateExpectancy(returns: number[]): number {
+    if (returns.length === 0) return 0;
+    
+    const wins = returns.filter(r => r > 0);
+    const losses = returns.filter(r => r < 0);
+    
+    const winRate = wins.length / returns.length;
+    const lossRate = losses.length / returns.length;
+    
+    const avgWin = wins.length > 0 ? (wins.reduce((a, b) => a + b, 0) / wins.length) : 0;
+    const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((a, b) => a + b, 0) / losses.length) : 0;
+    
+    return (winRate * avgWin) - (lossRate * avgLoss);
+  }
+
+  /**
+   * ปรับฐานราคา Benchmark ให้เริ่มต้นเท่ากับเงินทุนของพอร์ต (เพื่อพล็อตกราฟเปรียบเทียบ Equity Curve)
+   */
+  static normalizeEquity(prices: number[], initialCapital: number): number[] {
+    if (prices.length === 0) return [];
+    const firstPrice = prices[0];
+    if (firstPrice === undefined || firstPrice === 0) return prices.map(() => 0);
+    
+    const units = initialCapital / firstPrice;
+    return prices.map(price => price * units);
+  }
+
+  /**
+   * สร้างข้อมูลสำหรับตาราง Heatmap ผลตอบแทนรายเดือน
+   * @param dates Array ของวันที่ รูปแบบ 'YYYY-MM-DD'
+   * @param dailyReturns Array ของผลตอบแทนรายวัน
+   */
+  static calculateMonthlyReturnsBreakdown(dates: string[], dailyReturns: number[]) {
+    if (dates.length === 0 || dates.length - 1 !== dailyReturns.length) return [];
+
+    const monthlyMap = new Map<string, number[]>();
+
+    // จัดกลุ่มผลตอบแทนรายวันตาม 'YYYY-MM'
+    for (let i = 0; i < dailyReturns.length; i++) {
+      // dailyReturns จะช้ากว่า dates อยู่ 1 index เสมอ (เพราะวันแรกไม่มีผลตอบแทน)
+      const dateStr = dates[i + 1]; 
+      const ret = dailyReturns[i];
+      if (!dateStr || ret === undefined) continue;
+
+      const yearMonth = dateStr.substring(0, 7); // สกัด 'YYYY-MM'
+      if (!monthlyMap.has(yearMonth)) {
+        monthlyMap.set(yearMonth, []);
+      }
+      monthlyMap.get(yearMonth)!.push(ret);
+    }
+
+    // คำนวณ Geometric Return สำหรับแต่ละเดือน
+    const result = Array.from(monthlyMap.entries()).map(([yearMonth, returns]) => {
+      const [year, month] = yearMonth.split('-');
+      const compoundReturn = returns.reduce((acc, r) => acc * (1 + r), 1) - 1;
+      return {
+        year: parseInt(year!),
+        month: parseInt(month!),
+        label: yearMonth,
+        return: compoundReturn
+      };
+    });
+
+    return result.sort((a, b) => a.label.localeCompare(b.label)); // เรียงจากอดีต -> ปัจจุบัน
+  }
 }

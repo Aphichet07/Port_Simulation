@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  X, // เพิ่ม X icon
+  X,
 } from "lucide-react";
 
 interface Asset {
@@ -108,13 +108,24 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
       setMessageError("Please enter a portfolio name.");
       return;
     }
-    if (totalWeight !== 100) {
+
+    const activeItems = portfolioItems.filter(
+      (item) => item.symbol.trim() !== "" || item.ratio !== ""
+    );
+
+    const currentTotalWeight = activeItems.reduce(
+      (sum, item) => sum + (Number(item.ratio) || 0),
+      0
+    );
+
+    if (currentTotalWeight !== 100) {
       setMessageError(
-        `Total ratio must be exactly 100. Current is ${totalWeight}.`,
+        `Total ratio must be exactly 100. Current is ${currentTotalWeight}.`,
       );
       return;
     }
-    const hasEmptySymbol = portfolioItems.some((item) => !item.symbol.trim());
+
+    const hasEmptySymbol = activeItems.some((item) => !item.symbol.trim());
     if (hasEmptySymbol) {
       setMessageError("Please fill in all asset symbols.");
       return;
@@ -122,26 +133,22 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
 
     setIsLoading(true);
 
-    const assetArray = portfolioItems.map((item) => ({
+    const assetArray = activeItems.map((item) => ({
       symbol: item.symbol,
       weight: Number(item.ratio) / 100,
     }));
+    
     const payload = { name: name, asset: assetArray };
     const endpoint = "/portfolio/create";
 
     try {
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(";").shift();
-        return null;
-      };
-
-      const authToken = getCookie("token") || getCookie("access_token");
+      const authToken =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
       if (!authToken) {
         throw new Error("ไม่พบ Token การเข้าสู่ระบบ กรุณา Login ใหม่");
       }
+      
       const res = await axios.post(
         `http://localhost:7000${endpoint}`,
         payload,
@@ -149,10 +156,9 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
           headers: {
             Authorization: `Bearer ${authToken}`,
           },
-          withCredentials: true,
         },
       );
-
+      console.log(res);
       setIsCreated(true);
       setName("");
       setPortfolioItems([{ symbol: "", ratio: "" }]);
@@ -160,7 +166,7 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
       setTimeout(() => {
         onClose();
       }, 1500);
-
+      console.log("port :", res.data);
       return res.data;
     } catch (error: any) {
       console.log(error.message);
@@ -192,7 +198,6 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* ปุ่ม X */}
               <button
                 onClick={onClose}
                 className="text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-1.5 rounded-md transition-colors"
@@ -243,7 +248,6 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
                     key={index}
                     className="grid grid-cols-12 gap-3 items-center bg-slate-50 p-3 rounded-[10px] group transition-all hover:bg-slate-100/50"
                   >
-                    {/* Asset Input with Dropdown */}
                     <div className="col-span-7 relative">
                       <input
                         type="text"
@@ -258,7 +262,6 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
                         onBlur={() => setActiveDropdown(null)}
                       />
 
-                      {/* Autocomplete Dropdown */}
                       {activeDropdown === index &&
                         item.symbol.length > 0 &&
                         filteredStocks.length > 0 && (
@@ -288,7 +291,6 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
                         )}
                     </div>
 
-                    {/* Weight Input */}
                     <div className="col-span-4 relative flex items-center">
                       <input
                         type="number"
@@ -306,7 +308,6 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
                       </span>
                     </div>
 
-                    {/* Remove Button */}
                     <div className="col-span-1 flex justify-center">
                       {portfolioItems.length > 1 ? (
                         <button

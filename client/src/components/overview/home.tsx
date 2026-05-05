@@ -32,23 +32,6 @@ const HomePage = () => {
 
   const andleBenchmark = async () => {};
 
-  // const renderHome = () => (
-  //   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-500 min-h-screen">
-  //     <AssetPerformanceTable
-  //       isPortfolioDropdownOpen={isPortfolioDropdownOpen}
-  //       setIsPortfolioDropdownOpen={setIsPortfolioDropdownOpen}
-  //       selectedPortfolio={selectedPortfolio}
-  //       setSelectedPortfolio={setSelectedPortfolio}
-  //       selectedAssetId={selectedAssetId}
-  //       setSelectedAssetId={(id: number) => setSelectedAssetId(id)}
-  //     />
-  //     <div className="lg:col-span-7 flex flex-col gap-6 text-slate-900">
-  //       <MarketFeed chartData={chartData} />
-  //       <CreatePortfolioForm />
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500 selection:text-white flex flex-col h-screen overflow-hidden">
       <style

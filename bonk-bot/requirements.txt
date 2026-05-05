@@ -9,3 +9,6 @@ tavily-python
 pandas
 catboost
 logisticregression
+numpy 
+pandas 
+pythainlp

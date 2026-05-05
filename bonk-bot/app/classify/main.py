@@ -10,7 +10,7 @@ main.py - แผงควบคุมหลักของระบบ Classify
 import os
 import sys
 import argparse
-
+import numpy as np
 # เพิ่ม path ให้ import ไฟล์ใน src/ 
 src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src')
 sys.path.insert(0, src_dir)
@@ -19,7 +19,7 @@ sys.path.insert(0, src_dir)
 def run_clean():
     """รัน pipeline ทำความสะอาดข้อมูล"""
     import pandas as pd
-    from feature.feature import FeatureEngineer
+    from src.feature.feature import FeatureEngineer
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     raw_path = os.path.join(base_dir, 'data', 'raw', 'dataset.csv')
@@ -50,14 +50,14 @@ def run_train():
     """รันการเทรนโมเดล"""
     model_dir = os.path.join(src_dir, 'model')
     sys.path.insert(0, model_dir)
-    from train import train
+    from src.model.train import train
     train()
 
 
 def run_predict(text: str):
     """ทำนายผลข้อความ"""
-    from function import ClassifyFunction
-
+    from src.function import ClassifyFunction
+    
     clf = ClassifyFunction()
     result, score = clf.classify(text)
     label = "About Stock (1)" if result == 1 else "About Chat (0)"

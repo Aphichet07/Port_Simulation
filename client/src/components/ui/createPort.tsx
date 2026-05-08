@@ -200,7 +200,7 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
             <div className="flex items-center gap-4">
               <button
                 onClick={onClose}
-                className="text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-1.5 rounded-md transition-colors"
+                className="cursor-pointer text-slate-400 hover:text-slate-800 hover:bg-slate-100 p-1.5 rounded-md transition-colors"
               >
                 <X size={20} />
               </button>

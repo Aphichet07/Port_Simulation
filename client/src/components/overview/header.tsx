@@ -88,7 +88,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
                 </div>
                 <div className="text-left hidden md:block">
                   <p className="text-sm font-medium leading-none mb-1 tracking-tight">Apichet Runbor</p>
-                  <p className="text-[11px] tracking-tighter font-bold">Total Amount : 3,000 $</p>
+                  <p className="text-[11px] tracking-tighter font-bold">Total Amount : 4,000 $</p>
                 </div>
               </div>
             </Link>

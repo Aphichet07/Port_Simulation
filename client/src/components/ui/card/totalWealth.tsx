@@ -149,7 +149,7 @@ const TotalWealthChart = () => {
         {/* Title Section */}
         <div className="flex items-center gap-2 text-slate-500">
           <Wallet size={20} className="text-blue-600" />
-          <h2 className="font-bold tracking-tight text-slate-800">
+          <h2 className="font-semibold tracking-tight text-slate-800">
             Total Wealth (Backtest)
           </h2>
         </div>
@@ -159,7 +159,7 @@ const TotalWealthChart = () => {
             {/* Dropdown Button */}
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-bold transition-all border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              className="cursor-pointer flex items-center gap-2 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm font-bold transition-all border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               {activePortfolio?.port_name || "กำลังโหลด..."}
               <ChevronDown
@@ -192,7 +192,7 @@ const TotalWealthChart = () => {
                         setSelectedPortId(port.id);
                         setIsDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors
+                      className={`cursor-pointer w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors
                       ${
                         port.id === selectedPortId
                           ? "bg-blue-50 text-blue-700 border-r-4 border-blue-600"
@@ -228,7 +228,7 @@ const TotalWealthChart = () => {
         <>
           <div className="flex items-start justify-between animate-in fade-in duration-500">
             <div>
-              <h1 className="text-4xl sm:text-5xl font-black">
+              <h1 className="text-4xl sm:text-5xl font-bold">
                 ฿
                 {report.equityCurve[
                   report.equityCurve.length - 1
@@ -242,14 +242,14 @@ const TotalWealthChart = () => {
             {report.metrics && (
               <div className="hidden sm:flex gap-4">
                 <div className="bg-slate-800 px-4 py-2 rounded-lg text-center border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Sharpe</p>
-                  <p className="font-bold text-emerald-400">
+                  <p className="text-xs text-slate-300 mb-1">Sharpe</p>
+                  <p className="font-semibold text-emerald-400">
                     {report.metrics.sharpeRatio.toFixed(2)}
                   </p>
                 </div>
                 <div className="bg-slate-800 px-4 py-2 rounded-lg text-center border border-slate-700/50">
-                  <p className="text-xs text-slate-400 mb-1">Max DD</p>
-                  <p className="font-bold text-rose-400">
+                  <p className="text-xs text-slate-300 mb-1">Max DD</p>
+                  <p className="font-semibold text-rose-400">
                     {report.metrics.maxDrawdown.toFixed(2)}%
                   </p>
                 </div>
@@ -294,7 +294,7 @@ const TotalWealthChart = () => {
                     borderRadius: "8px",
                     color: "#fff",
                   }}
-                  itemStyle={{ color: "#34d399", fontWeight: "bold" }}
+                  itemStyle={{ color: "#34d399", fontWeight: "semibold" }}
                   formatter={(value: any) => {
                     const numValue =
                       typeof value === "number" ? value : Number(value) || 0;

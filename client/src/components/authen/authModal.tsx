@@ -171,7 +171,7 @@ export default function AuthModal() {
         {/* Right Side: Auth Form */}
         <div className="p-8 lg:p-16 flex flex-col justify-center bg-white relative">
           
-          <Link href="/landing"><div className="cursor-pointer flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-black uppercase tracking-[0.2em] mb-10 w-fit transition-all group">
+          <Link href="/landing"><div className="cursor-pointer flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-black uppercase tracking-widest mb-10 w-fit transition-all group">
             <ChevronLeft
               size={14}
               className="group-hover:-translate-x-1 transition-transform"
@@ -183,7 +183,7 @@ export default function AuthModal() {
             <h2 className="text-3xl font-black text-slate-900 tracking-widest  uppercase mb-2">
               {isLoginView ? "Welcome Back" : "Get The Edge"}
             </h2>
-            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.2em] ">
+            <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest ">
               {isLoginView 
                 ? "ลงชื่อเข้าใช้เพื่อจัดการกลยุทธ์ของคุณ" 
                 : "สมัครสมาชิกเพื่อเริ่มใช้ระบบจำลองระดับ Quant"}
@@ -213,10 +213,10 @@ export default function AuthModal() {
                   />
                   <input
                     type="text"
-                    placeholder="ex:apichet portfolio"
+                    placeholder="e.g. apichet portfolio"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-medium transition-all placeholder:text-slate-300"
+                    className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-regular transition-all placeholder:text-slate-300"
                     required={!isLoginView} // บังคับกรอกเฉพาะหน้าสมัคร
                   />
                 </div>
@@ -234,10 +234,10 @@ export default function AuthModal() {
                 />
                 <input
                   type="email"
-                  placeholder="ex:portfolio@gmail.com"
+                  placeholder="portfolio@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-medium transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-4 rounded-[10px] outline-none text-sm font-regular transition-all placeholder:text-slate-300"
                   required
                 />
               </div>
@@ -268,7 +268,7 @@ export default function AuthModal() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-12 rounded-[10px] outline-none text-sm font-semibold transition-all placeholder:text-slate-300"
+                  className="w-full bg-slate-50 border border-slate-100 focus:border-black py-3.5 pl-10 pr-12 rounded-[10px] outline-none text-sm font-regular transition-all placeholder:text-slate-300"
                   required
                 />
                 <button

@@ -93,7 +93,7 @@ function BonkChatWidget() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="เปิดหน้าต่างแชท"
-          className="bg-black text-white p-4 lg:p-5 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-95 border border-white/20 transition-all duration-300 ease-out flex items-center justify-center"
+          className="cursor-pointer bg-black text-white p-4 lg:p-5 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.3)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-95 border border-white/20 transition-all duration-300 ease-out flex items-center justify-center"
         >
           <Bot size={28} />
         </button>
@@ -112,15 +112,17 @@ function BonkChatWidget() {
           <div className="flex items-center gap-2">
             <Bot size={24} />
             <span>Bonk Bot</span>
+            
           </div>
           <button
             onClick={() => setIsOpen(false)}
             aria-label="ปิดหน้าต่างแชท"
-            className="p-1.5 bg-white/10 hover:bg-white/25 rounded-full transition-colors duration-200 active:scale-95 flex items-center justify-center"
+            className="cursor-pointer p-1.5 bg-white/10 hover:bg-white/25 rounded-full transition-colors duration-200 active:scale-95 flex items-center justify-center"
           >
-            <X size={20} className="text-white" />
+            <X size={20} className="text-white " />
           </button>
         </div>
+        
 
         {/* พื้นที่ข้อความ */}
         <div className="flex-1 p-4 bg-gray-50 overflow-y-auto flex flex-col gap-4 scroll-smooth">
@@ -199,7 +201,7 @@ function BonkChatWidget() {
             <button
               type="submit"
               disabled={!inputText.trim() || isLoading}
-              className="absolute right-1 top-1 bottom-1 bg-black text-white w-10 flex items-center justify-center rounded-full font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-700 active:scale-95 transition-all"
+              className="cursor-pointer absolute right-1 top-1 bottom-1 bg-blue-600 text-white w-10 flex items-center justify-center rounded-full font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-800 active:scale-95 transition-all"
             >
               <SendHorizontal
                 size={18}

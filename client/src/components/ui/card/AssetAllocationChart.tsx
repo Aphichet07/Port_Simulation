@@ -37,10 +37,10 @@ const AssetAllocationChart = ({
               <table className="w-full text-left border-collapse mb-8">
                 <thead>
                   <tr className="border-b-2 border-slate-100">
-                    <th className="py-2 font-bold text-slate-800 text-sm">
+                    <th className="py-2 font-bold text-slate-500 text-sm">
                       Asset Class
                     </th>
-                    <th className="py-2 font-bold text-slate-800 text-right text-sm">
+                    <th className="py-2 font-bold text-slate-500 text-right text-sm">
                       Allocation
                     </th>
                   </tr>
@@ -64,12 +64,12 @@ const AssetAllocationChart = ({
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-bold shadow-sm">
+                <button className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-bold shadow-sm">
                   <Edit3 size={16} /> Edit Portfolio
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-bold shadow-sm">
+                {/* <button className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-all text-sm font-bold shadow-sm">
                   <Save size={16} /> Save Portfolio
-                </button>
+                </button> */}
               </div>
             </div>
 

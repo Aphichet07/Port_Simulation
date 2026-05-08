@@ -27,7 +27,7 @@ const EquityCurveCard = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h3 className="text-lg font-bold text-slate-800">Equity Curve</h3>
-          <p className="text-xs text-slate-400 font-medium tracking-tight">
+          <p className="text-xs text-slate-400 font-regular mt-1">
             กราฟแสดงการเติบโตของเงินทุนรวมย้อนหลัง
           </p>
         </div>
@@ -38,7 +38,7 @@ const EquityCurveCard = ({
             <button
               key={tf}
               onClick={() => onTimeframeChange(tf)}
-              className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all duration-200 ${
+              className={`cursor-pointer px-4 py-1.5 text-xs font-bold rounded-md transition-all duration-200 ${
                 timeframe === tf
                   ? "bg-blue-600 text-white shadow-md"
                   : "text-slate-400 hover:text-slate-600"

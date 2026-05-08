@@ -78,10 +78,10 @@ const MarketOverviewWidget = () => {
           >
             <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                   {data.symbol}
                 </p>
-                <p className="text-sm font-bold text-slate-800 truncate">
+                <p className="text-md font-bold text-slate-800">
                   {data.name}
                 </p>
               </div>
@@ -96,14 +96,14 @@ const MarketOverviewWidget = () => {
               </div>
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-900">
+              <h3 className="text-xl font-bold text-slate-900">
                 {data.price.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
               </h3>
               <p
-                className={`text-xs font-bold mt-1 ${isPositive ? "text-emerald-500" : "text-rose-500"}`}
+                className={`text-xs font-semibold mt-1 ${isPositive ? "text-emerald-500" : "text-rose-500"}`}
               >
                 {isPositive ? "+" : ""}
                 {data.change.toFixed(2)} ({data.changePercent.toFixed(2)}%)

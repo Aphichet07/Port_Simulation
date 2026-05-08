@@ -37,6 +37,7 @@ export const SimulateView = () => {
 
   const [allocationData, setAllocationData] = useState<any[]>([]);
   const [isAllocLoading, setIsAllocLoading] = useState(false);
+  const [mobileView, setMobileView] = useState<"config" | "result">("config");
 
   useEffect(() => {
     setIsMounted(true);
@@ -117,6 +118,7 @@ export const SimulateView = () => {
     try {
       setIsOptimizing(true);
       setOptResult(null);
+      setMobileView("result");
 
       const res = await axios.post("http://127.0.0.1:8000/optimize", payload);
 
@@ -172,27 +174,27 @@ export const SimulateView = () => {
 
       <AppHeader />
 
-      <div className="flex-1 overflow-hidden px-4 md:px-8 pb-8 pt-4">
-        <main className="w-full h-full bg-white rounded-2xl shadow-xl overflow-hidden flex text-slate-900 border border-slate-200">
+      <div className="flex-1 overflow-hidden px-4 sm:px-8 pb-8">
+        <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden flex text-slate-900 gap-4 p-4 md:p-6">
           {/* LEFT SIDEBAR: CONFIGURATION */}
-          <aside className="w-80 border-r border-slate-100 bg-slate-50/50 flex flex-col shrink-0">
-            <div className="p-6 border-b border-slate-200 bg-white">
-              <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                <Zap className="text-amber-500" size={24} /> AI Optimizer
+          <aside className={`w-full md:w-80 flex-col border border-slate-200 bg-white rounded-2xl shadow-sm shrink-0 overflow-hidden ${mobileView === "result" ? "hidden md:flex" : "flex"}`}>
+            <div className="p-6 border-b border-slate-200 bg-slate-50/50">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                 AI Optimizer
               </h2>
               <p className="text-xs text-slate-500 mt-1 font-medium">
-                Rebalance & Enhance your portfolio
+                ปรับสมดุลและเพิ่มประสิทธิภาพพอร์ตของคุณ
               </p>
             </div>
 
             <div className="p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
               {/* Select Portfolio */}
               <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                   <Briefcase size={16} /> Select Portfolio
                 </label>
                 <select
-                  className="w-full p-3 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="cursor-pointer text-slate-500 w-full p-3 rounded-xl border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   value={selectedPortId !== null ? selectedPortId : ""}
                   onChange={(e) => setSelectedPortId(Number(e.target.value))}
                 >
@@ -209,7 +211,7 @@ export const SimulateView = () => {
 
               {/* Set Top N */}
               <div className="space-y-3">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                   <Settings size={16} /> Asset Recommendations
                 </label>
                 <div className="flex items-center gap-4">
@@ -219,24 +221,24 @@ export const SimulateView = () => {
                     max="10"
                     value={topN}
                     onChange={(e) => setTopN(Number(e.target.value))}
-                    className="flex-1 accent-blue-600"
+                    className="flex-1 accent-blue-600 cursor-pointer"
                   />
                   <span className="w-10 text-center font-bold text-blue-600 bg-blue-50 py-1 rounded-md">
                     {topN}
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-400">
-                  จำนวนสินทรัพย์แนะนำที่ระบบจะเสนอเพิ่มเข้ามาในพอร์ต
+                  หมายเหตุ: จำนวนสินทรัพย์แนะนำที่ระบบจะเสนอเพิ่มเข้ามาในพอร์ต
                 </p>
               </div>
             </div>
 
             {/* Action Button */}
-            <div className="p-6 bg-white border-t border-slate-100">
+            <div className="p-6 bg-white border-t border-slate-100 space-y-3">
               <button
                 onClick={handleOptimize}
                 disabled={selectedPortId === null || isOptimizing}
-                className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white p-4 rounded-xl font-bold hover:bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                className="text-[12px] tracking-[0.2em] uppercase cursor-pointer w-full flex items-center justify-center gap-2 bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 {isOptimizing ? (
                   <>
@@ -245,15 +247,34 @@ export const SimulateView = () => {
                   </>
                 ) : (
                   <>
-                    <Zap size={18} /> Run Optimization
+                    <Zap className="text-slate-200" size={16} />Run Optimization
                   </>
                 )}
               </button>
+              {(optResult || isOptimizing) && (
+                <button
+                  onClick={() => setMobileView("result")}
+                  className="md:hidden w-full flex items-center justify-center gap-2 bg-slate-100 text-slate-700 p-3 rounded-xl font-semibold hover:bg-slate-200 transition-all text-sm"
+                >
+                  ดูผลลัพธ์ <ArrowRightCircle size={16} />
+                </button>
+              )}
             </div>
           </aside>
 
           {/* RIGHT MAIN: RESULTS DASHBOARD */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30 p-6 lg:p-8">
+          <div className={`flex-1 overflow-y-auto custom-scrollbar bg-slate-50/30 border border-slate-200 rounded-2xl shadow-sm flex-col min-w-0 ${mobileView === "config" ? "hidden md:flex" : "flex"}`}>
+            {/* Mobile back button */}
+            <div className="md:hidden flex items-center gap-3 p-4 border-b border-slate-100 bg-white rounded-t-2xl shrink-0">
+              <button
+                onClick={() => setMobileView("config")}
+                className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <ArrowRightCircle size={16} className="text-slate-600 rotate-180" />
+              </button>
+              <span className="text-sm font-bold text-slate-700">ผลลัพธ์การ Optimize</span>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-8">
             {!optResult && !isOptimizing && (
               <div className="h-full flex flex-col items-center justify-center text-slate-400">
                 <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
@@ -611,6 +632,7 @@ export const SimulateView = () => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         </main>
       </div>

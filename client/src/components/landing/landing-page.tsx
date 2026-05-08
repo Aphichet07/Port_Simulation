@@ -1,8 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from 'next/navigation';
+
+// --- Hook: Scroll-triggered reveal ---
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
+
+// --- Hook: Animated counter ---
+function useCounter(target: number, inView: boolean, duration = 1600) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    let start = 0;
+    const step = Math.ceil(target / (duration / 16));
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setCount(target); clearInterval(timer); }
+      else setCount(start);
+    }, 16);
+    return () => clearInterval(timer);
+  }, [inView, target, duration]);
+  return count;
+}
 const PORTFOLIOS = [
   { name: "Mebane Faber Ivy Portfolio",      ytd: "+15.11%", y1: "+29.76%" },
   { name: "Bill Bernstein No Brainer",        ytd: "+6.76%",  y1: "+24.96%" },
@@ -51,6 +85,26 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
+  // Scroll reveal sections
+  const statsSection  = useInView(0.2);
+  const valueSection  = useInView(0.15);
+  const toolsSection  = useInView(0.1);
+  const ctaSection    = useInView(0.2);
+
+  // Animated stat counters
+  const STAT_NUMS = [5100000, 100, 30, 187000];
+  const c0 = useCounter(STAT_NUMS[0], statsSection.inView);
+  const c1 = useCounter(STAT_NUMS[1], statsSection.inView);
+  const c2 = useCounter(STAT_NUMS[2], statsSection.inView);
+  const c3 = useCounter(STAT_NUMS[3], statsSection.inView);
+  const counters = [c0, c1, c2, c3];
+  const formatStat = (idx: number, val: number) => {
+    if (idx === 0) return val >= 1000000 ? `${(val/1000000).toFixed(1)}M` : val.toLocaleString();
+    if (idx === 3) return val >= 1000 ? `${Math.round(val/1000)}K+` : val.toString();
+    if (idx === 1) return val >= 100 ? "100+" : val.toString();
+    return val.toString();
+  };
+
   return (
     <div className="min-h-screen bg-white text-black font-sans selection:bg-black selection:text-white overflow-x-hidden">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -58,15 +112,133 @@ export default function LandingPage() {
         * { font-family: 'Work Sans', 'Noto Sans Thai', sans-serif !important; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(28px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-32px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(32px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleIn {
+          from { opacity: 0; transform: scale(0.92); }
+          to   { opacity: 1; transform: scale(1); }
+        }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-        .fade-up { animation: fadeUp .6s ease both; }
+        @keyframes float {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-8px); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes borderPulse {
+          0%,100% { border-color: rgba(0,232,122,0.3); }
+          50%      { border-color: rgba(0,232,122,0.8); }
+        }
+
+        .fade-up   { animation: fadeUp  .65s cubic-bezier(.22,1,.36,1) both; }
+        .fade-in   { animation: fadeIn  .6s ease both; }
+        .slide-left  { animation: slideInLeft  .65s cubic-bezier(.22,1,.36,1) both; }
+        .slide-right { animation: slideInRight .65s cubic-bezier(.22,1,.36,1) both; }
+        .scale-in  { animation: scaleIn .65s cubic-bezier(.22,1,.36,1) both; }
+
         .d1{animation-delay:.08s} .d2{animation-delay:.18s}
-        .d3{animation-delay:.28s} .d4{animation-delay:.38s}
-        .live-dot { animation: blink 2s infinite; }
+        .d3{animation-delay:.28s} .d4{animation-delay:.40s}
+        .d5{animation-delay:.52s} .d6{animation-delay:.64s}
+
+        .live-dot  { animation: blink 2s infinite; }
+        .float-card { animation: float 4s ease-in-out infinite; }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-left { opacity: 0; transform: translateX(-28px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+        .reveal-left.visible { opacity: 1; transform: translateX(0); }
+        .reveal-right { opacity: 0; transform: translateX(28px); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+        .reveal-right.visible { opacity: 1; transform: translateX(0); }
+        .reveal-scale { opacity: 0; transform: scale(0.93); transition: opacity .65s cubic-bezier(.22,1,.36,1), transform .65s cubic-bezier(.22,1,.36,1); }
+        .reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+        .stagger-1 { transition-delay: .05s; }
+        .stagger-2 { transition-delay: .12s; }
+        .stagger-3 { transition-delay: .19s; }
+        .stagger-4 { transition-delay: .26s; }
+        .stagger-5 { transition-delay: .33s; }
+        .stagger-6 { transition-delay: .40s; }
+
+        .shimmer-text {
+          background: linear-gradient(90deg, #000 40%, #00E87A 50%, #000 60%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: shimmer 3s linear infinite;
+        }
+        .nav-link-underline {
+          position: relative;
+        }
+        .nav-link-underline::after {
+          content: '';
+          position: absolute;
+          bottom: -2px; left: 0;
+          width: 0; height: 1px;
+          background: black;
+          transition: width .25s ease;
+        }
+        .nav-link-underline:hover::after { width: 100%; }
+
+        .tool-card {
+          transition: background .2s, transform .2s, box-shadow .2s;
+        }
+        .tool-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+        }
+        .stat-card {
+          transition: transform .3s cubic-bezier(.22,1,.36,1);
+        }
+        .stat-card:hover { transform: scale(1.06); }
+
+        .green-dot-pulse {
+          animation: blink 2s infinite;
+          box-shadow: 0 0 0 0 rgba(0,232,122,0.4);
+        }
+        .feature-row {
+          transition: border-color .25s, background .25s, transform .25s;
+        }
+        .feature-row:hover {
+          border-color: rgba(255,255,255,0.18) !important;
+          background: rgba(255,255,255,0.04);
+          transform: translateX(4px);
+        }
+        .portfolio-row {
+          transition: background .2s;
+        }
+        .portfolio-row:hover { background: rgba(255,255,255,0.04); }
+
+        .cta-btn {
+          position: relative; overflow: hidden;
+          transition: transform .2s, box-shadow .2s;
+        }
+        .cta-btn::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: rgba(255,255,255,0.12);
+          transform: translateX(-100%);
+          transition: transform .3s ease;
+        }
+        .cta-btn:hover::after { transform: translateX(0); }
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.35); }
       `}} />
 
       {/* ── NAV ── */}
@@ -81,7 +253,7 @@ export default function LandingPage() {
 
           <nav className="hidden md:flex items-center gap-8">
             {["Analysis", "Markets", "Pricing", "Docs"].map(l => (
-              <a key={l} href="#" className="text-[13px] text-black/40 hover:text-black transition-colors tracking-tight">{l}</a>
+              <a key={l} href="#" className="nav-link-underline text-[13px] text-black/40 hover:text-black transition-colors tracking-tight">{l}</a>
             ))}
           </nav>
 
@@ -127,8 +299,8 @@ export default function LandingPage() {
               Sophisticated analytics once reserved for institutions — explained clearly, built for everyone.
             </p>
             <div className="fade-up d3 flex items-center gap-4 flex-wrap">
-              <Link href="/authen?mode=register" className="bg-black text-white text-[13px] font-semibold px-7 py-3.5 rounded-[7px] hover:bg-black/80 transition-colors">
-                Get Started
+              <Link href="/authen?mode=register" className="cta-btn bg-blue-600 text-white text-[13px] font-semibold px-7 py-3.5 rounded-[7px] hover:bg-blue-800 transition-colors">
+                Get Started →
               </Link>
               <a href="" className="flex items-center gap-2 text-[13px] text-black/35 hover:text-black transition-colors">
                 <span className="live-dot w-1.5 h-1.5 rounded-full bg-[#00E87A] inline-block"/>
@@ -138,7 +310,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right — dark card (30% black) */}
-          <div id="market" className="fade-up d4 bg-black rounded-[14px] p-7 text-white">
+          <div id="market" className="fade-up d4 float-card bg-black rounded-[14px] p-7 text-white">
             <div className="flex items-center justify-between mb-5">
               <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/90">Market Monitor</p>
               <span className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-[#00E87A]">
@@ -156,7 +328,7 @@ export default function LandingPage() {
               </thead>
               <tbody>
                 {PORTFOLIOS.map((p, i) => (
-                  <tr key={i} className="border-b border-white/5 last:border-0">
+                  <tr key={i} className="portfolio-row border-b border-white/5 last:border-0 cursor-default">
                     <td className="py-3 text-[11px] text-white/50 pr-4">{p.name}</td>
                     <td className="py-3 text-right text-[11px] font-semibold text-[#00E87A]">{p.ytd}</td>
                     <td className="py-3 text-right text-[11px] text-white/50 hidden sm:table-cell">{p.y1}</td>
@@ -174,11 +346,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS — white bg ── */}
-      <section className="border-y border-black/6">
+      <section className="border-y border-black/6" ref={statsSection.ref}>
         <div className="max-w-6xl mx-auto px-6 xl:px-0 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="text-[clamp(28px,4vw,40px)] font-semibold tracking-tight">{s.num}</div>
+            <div key={i} className={`stat-card text-center reveal stagger-${i+1} ${statsSection.inView ? 'visible' : ''}`}>
+              <div className="text-[clamp(28px,4vw,40px)] font-semibold tracking-tight">
+                {statsSection.inView ? formatStat(i, counters[i]) : "0"}
+              </div>
               <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/30 mt-1">{s.label}</div>
             </div>
           ))}
@@ -186,9 +360,9 @@ export default function LandingPage() {
       </section>
 
       {/* ── VALUE PROP — black section (30%) ── */}
-      <section className="bg-black text-white">
+      <section className="bg-black text-white" ref={valueSection.ref}>
         <div className="max-w-6xl mx-auto px-6 xl:px-0 py-24 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          <div>
+          <div className={`reveal-left ${valueSection.inView ? 'visible' : ''}`}>
             <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/50 mb-5">Design. Analyze. Compare.</p>
             <h2 className="text-[clamp(28px,4vw,52px)] font-semibold tracking-tight leading-tight mb-5">
               Investments worst<br/>
@@ -197,19 +371,19 @@ export default function LandingPage() {
             <p className="text-[14px] text-white/50 font-light leading-relaxed max-w-sm mb-8">
               Portfolio Visualizer turns sophisticated analytics into actionable insight — explained by AI. Available to anyone, anywhere.
             </p>
-            <Link href="/authen?mode=register" className="inline-block bg-white text-black text-[12px] font-semibold px-6 py-3 rounded-[7px] hover:bg-white/85 transition-colors tracking-tight">
+            <Link href="/authen?mode=register" className="cta-btn inline-block bg-white text-black text-[12px] font-semibold px-6 py-3 rounded-[7px] hover:bg-white/85 transition-colors tracking-tight">
               Get Started Free →
             </Link>
           </div>
-          <div className="space-y-4">
+          <div className={`space-y-4 reveal-right ${valueSection.inView ? 'visible' : ''}`} style={{transitionDelay: '0.1s'}}>
             {[
               { label: "Institutional Grade Security",   sub: "Bank-level encryption for all your data" },
               { label: "End-to-End Encryption",          sub: "Your portfolio data stays private" },
               { label: "Real-Time Simulation Engine",    sub: "Sub-second backtesting on any device" },
               { label: "Global Market Access",           sub: "30+ markets, 187K+ securities" },
-            ].map(f => (
-              <div key={f.label} className="flex items-start gap-4 p-4 rounded-[10px] border border-white/6 hover:border-white/12 transition-colors">
-                <div className="w-2 h-2 rounded-full bg-[#00E87A] mt-1.5 shrink-0"/>
+            ].map((f, i) => (
+              <div key={f.label} className="feature-row flex items-start gap-4 p-4 rounded-[10px] border border-white/6 transition-colors">
+                <div className="w-2 h-2 rounded-full bg-[#00E87A] mt-1.5 shrink-0 green-dot-pulse"/>
                 <div>
                   <p className="text-[13px] font-medium text-white/90 mb-0.5">{f.label}</p>
                   <p className="text-[12px] text-white/50 font-light">{f.sub}</p>
@@ -221,14 +395,16 @@ export default function LandingPage() {
       </section>
 
       {/* ── TOOLS — white bg ── */}
-      <section className="max-w-6xl mx-auto px-6 xl:px-0 py-24">
-        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-black/30 mb-4">Most Popular</p>
-        <h2 className="text-[clamp(26px,3.5vw,44px)] font-semibold tracking-tight leading-tight mb-14">
-          Understand your<br/>portfolio better
-        </h2>
+      <section className="max-w-6xl mx-auto px-6 xl:px-0 py-24" ref={toolsSection.ref}>
+        <div className={`reveal ${toolsSection.inView ? 'visible' : ''}`}>
+          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-black/30 mb-4">Most Popular</p>
+          <h2 className="text-[clamp(26px,3.5vw,44px)] font-semibold tracking-tight leading-tight mb-14">
+            Understand your<br/>portfolio better
+          </h2>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-black/6 border border-black/6 rounded-xl overflow-hidden">
-          {TOOLS.map(group => (
-            <div key={group.category} className="bg-white p-7 hover:bg-black/1.5 transition-colors">
+          {TOOLS.map((group, gi) => (
+            <div key={group.category} className={`tool-card bg-white p-7 reveal stagger-${gi+1} ${toolsSection.inView ? 'visible' : ''}`}>
               <p className="text-[9px] font-black tracking-[0.22em] uppercase text-[#00E87A] mb-5 pb-3 border-b border-black/6">
                 {group.category}
               </p>
@@ -251,18 +427,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA — green (10%) ── */}
-      <section className="bg-black py-24 px-6 text-center">
-        <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/90 mb-5">Join the Outperformance</p>
-        <h2 className="text-[clamp(30px,4.5vw,58px)] font-semibold tracking-tight leading-tight mb-5 text-white">
-          Ready to invest<br/>
-          <span className="italic font-light">without the risk?</span>
-        </h2>
-        <p className="text-[15px] text-white/75 font-light max-w-sm mx-auto mb-10 leading-relaxed">
-          Join thousands of traders who simulate before they commit.
-        </p>
-        <Link href="/authen?mode=register" className="inline-block bg-[#10B981] text-white text-[13px] font-semibold px-10 py-4 rounded-[7px] hover:bg-[#10B981]/80 transition-colors">
-          Get Started Free →
-        </Link>
+      <section className="bg-black py-24 px-6 text-center" ref={ctaSection.ref}>
+        <div className={`reveal ${ctaSection.inView ? 'visible' : ''}`}>
+          <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-white/90 mb-5">Join the Outperformance</p>
+          <h2 className="text-[clamp(30px,4.5vw,58px)] font-semibold tracking-tight leading-tight mb-5 text-white">
+            Ready to invest<br/>
+            <span className="italic font-light">without the risk?</span>
+          </h2>
+          <p className="text-[15px] text-white/75 font-light max-w-sm mx-auto mb-10 leading-relaxed">
+            Join thousands of traders who simulate before they commit.
+          </p>
+          <Link href="/authen?mode=register" className="cta-btn inline-block bg-blue-600 text-white text-[13px] font-semibold px-10 py-4 rounded-[7px] hover:bg-blue-800 transition-colors">
+            Get Started Free →
+          </Link>
+        </div>
       </section>
 
 

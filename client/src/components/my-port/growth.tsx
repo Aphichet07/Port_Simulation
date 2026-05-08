@@ -51,7 +51,7 @@ export const GrowthSimulation = () => {
       </div>
 
       {/* Chart */}
-      <div className="flex-1 w-full min-h-[200px] md:min-h-[300px]">
+      <div className="flex-1 w-full min-h-50 md:min-h-75">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={GROWTH_DATA} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />

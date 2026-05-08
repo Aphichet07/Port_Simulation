@@ -54,7 +54,7 @@ const HomePage = () => {
           <div className="flex flex-col gap-y-12">
             <section className="flex flex-col gap-y-4">
               <div className="border-l-4 border-blue-600 pl-4">
-                <h2 className="text-xl font-bold text-slate-800 uppercase tracking-tight">
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">
                   Market Overview
                 </h2>
                 <p className="text-sm text-slate-500 mt-1">
@@ -66,10 +66,10 @@ const HomePage = () => {
 
             <section className="flex flex-col gap-y-4">
               <div className="border-l-4 border-emerald-500 pl-4">
-                <h2 className="text-xl font-bold text-slate-800 uppercase tracking-tight">
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">
                   Portfolio Performance
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm  text-slate-500 mt-1">
                   วิเคราะห์มูลค่าสินทรัพย์รวม (Backtest)
                   และตัวชี้วัดประสิทธิภาพเชิงปริมาณ (Quantitative Metrics)
                 </p>

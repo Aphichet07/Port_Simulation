@@ -107,7 +107,7 @@ const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             Sharpe Ratio
           </p>
-          <p className="text-xl font-black text-blue-600">
+          <p className="text-xl font-bold text-blue-600">
             {Number(metrics.sharpeRatio).toFixed(2)}
           </p>
         </div>
@@ -115,7 +115,7 @@ const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             Calmar Ratio
           </p>
-          <p className="text-xl font-black text-emerald-600">
+          <p className="text-xl font-bold text-emerald-600">
             {Number(metrics.calmarRatio).toFixed(2)}
           </p>
         </div>
@@ -123,7 +123,7 @@ const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             Annualized Vol
           </p>
-          <p className="text-xl font-black text-slate-700">
+          <p className="text-xl font-bold text-slate-700">
             {(metrics.annualizedVolatility * 100).toFixed(2)}%
           </p>
         </div>
@@ -131,7 +131,7 @@ const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
             VaR (95%)
           </p>
-          <p className="text-xl font-black text-rose-500">
+          <p className="text-xl font-bold text-rose-500">
             {(metrics.valueAtRisk * 100).toFixed(2)}%
           </p>
         </div>

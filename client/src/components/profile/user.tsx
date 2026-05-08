@@ -93,7 +93,7 @@ const App = () => {
 
       <AppHeader />
 
-      <div className="flex-1 overflow-hidden px-8 pb-8">
+      <div className="flex-1 overflow-hidden px-4 sm:px-8 pb-8">
         
         {/* Alerts & Toasts */}
         {errorMsg && (
@@ -110,7 +110,7 @@ const App = () => {
 
 
 
-   <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+   <main className="w-full h-full bg-white rounded-[10px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] p-4 md:p-6 overflow-y-auto custom-scrollbar">
   <div className="p-2 flex flex-col lg:flex-row gap-4 w-full min-h-full">  
     {/* Identity Section (Left) */}
     <div className="w-full lg:w-[32%] bg-white rounded-[10px] border border-slate-200 shadow-sm flex flex-col items-center text-center p-6 shrink-0">
@@ -148,12 +148,12 @@ const App = () => {
       {/* Simulation Wallet */}
       <div className="flex flex-col">
         <div className="mb-4">
-          <h3 className="text-xl font-medium tracking-tight text-black">Simulation Wallet</h3>
-          <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">จัดการเครดิตจำลองเพื่อใช้ในการทดสอบพอร์ตการลงทุน</p>
+          <h3 className="text-xl font-bold text-slate-800 tracking-tight">Simulation Wallet</h3>
+          <p className="text-sm text-slate-500 mt-1">จัดการเครดิตจำลองเพื่อใช้ในการทดสอบพอร์ตการลงทุน</p>
         </div>
         <div className="mb-6">
-          <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-2 opacity-70">
-            Available Credit {isDirty && <span className="text-amber-500">(Draft: ${balance.toLocaleString()})</span>}
+          <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 opacity-70">
+            Available Credit {isDirty && <span className="text-blue-600">(Draft: ${balance.toLocaleString()})</span>}
           </p>
           <h4 className={`text-4xl md:text-5xl font-black tracking-tighter leading-none transition-all duration-500 ${isDirty ? 'text-slate-400' : 'text-black'}`}>
             ${dbBalance.toLocaleString()}
@@ -170,8 +170,8 @@ const App = () => {
       {/* Preferences */}
       <div className="flex flex-col gap-6">
         <div>
-          <h3 className="text-xl font-medium tracking-tight text-black">Preferences</h3>
-          <p className="text-[12px] font-regular text-slate-400 uppercase mt-1">การตั้งค่า</p>
+          <h3 className="text-xl font-bold text-slate-800 tracking-tight">Preferences</h3>
+          <p className="text-sm text-slate-500 mt-1">การตั้งค่า</p>
         </div>
 
         <div>
@@ -220,7 +220,7 @@ const App = () => {
           onClick={handleSave}
           disabled={!isDirty || isSaving}
           className={`w-full sm:w-auto cursor-pointer px-8 py-4 rounded-[10px] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 transition-all ${
-            isDirty ? 'bg-black text-white hover:scale-105 active:scale-95' : 'bg-slate-50 text-slate-300 cursor-not-allowed'
+            isDirty ? 'bg-blue-600 text-white hover:scale-105 active:scale-95' : 'bg-slate-50 text-slate-300 cursor-not-allowed'
           }`}
         >
           {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16}/>}

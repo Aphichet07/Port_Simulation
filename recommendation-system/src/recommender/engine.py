@@ -1,8 +1,8 @@
 import pandas as pd
-from .clustering import Clustering
-from .context_model import MarketContextEngine
-from .risk_model import RiskModelEngine
-from .optimization import PortfolioOptimizer
+from src.recommender.clustering import Clustering
+from src.recommender.context_model import MarketContextEngine
+from src.recommender.optimization import PortfolioOptimizer
+from src.recommender.risk_model import RiskModelEngine
 from pathlib import Path
 
 class Engine:

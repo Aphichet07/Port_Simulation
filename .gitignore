@@ -12,8 +12,6 @@
 **/*.pyc
 
 # ML Models & Data
-**/models/
-**/saved_models/
 **/*.keras
 **/*.h5
 **/*.joblib

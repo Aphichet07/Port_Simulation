@@ -21,9 +21,9 @@ class Predictor:
         try:
             self.model = keras.models.load_model(Config.get_model_path())
             self.scaler = joblib.load(Config.get_scaler_path())
-            print("✅ Model and Scaler loaded successfully.")
+            print("Model and Scaler loaded successfully.")
         except Exception as e:
-            print(f"❌ Error loading assets: {e}")
+            print(f"Error loading assets: {e}")
 
     def predict(self, ticker: str):
         if self.model is None or self.scaler is None:

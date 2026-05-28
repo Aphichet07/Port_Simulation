@@ -355,7 +355,7 @@ export const Myport = () => {
           <aside className={`w-full md:w-80 lg:w-96 flex-col bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 shrink-0 ${mobileView === "detail" ? "hidden md:flex" : "flex"}`}>
             <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
                    My Vault
                 </h2>
                 <p className="text-xs text-slate-500 mt-1 font-medium uppercase">

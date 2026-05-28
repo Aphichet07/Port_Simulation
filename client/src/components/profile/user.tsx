@@ -148,7 +148,7 @@ const App = () => {
       {/* Simulation Wallet */}
       <div className="flex flex-col">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-slate-800 tracking-tight">Simulation Wallet</h3>
+          <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Simulation Wallet</h3>
           <p className="text-sm text-slate-500 mt-1">จัดการเครดิตจำลองเพื่อใช้ในการทดสอบพอร์ตการลงทุน</p>
         </div>
         <div className="mb-6">
@@ -170,7 +170,7 @@ const App = () => {
       {/* Preferences */}
       <div className="flex flex-col gap-6">
         <div>
-          <h3 className="text-xl font-bold text-slate-800 tracking-tight">Preferences</h3>
+          <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Preferences</h3>
           <p className="text-sm text-slate-500 mt-1">การตั้งค่า</p>
         </div>
 

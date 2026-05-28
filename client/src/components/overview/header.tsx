@@ -19,7 +19,7 @@ const NavItem = ({ label, icon, active, onClick, href }: {
   const content = (
     <div
       onClick={onClick}
-      className={`flex items-center gap-3 px-6 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-300 whitespace-nowrap ${
+      className={`flex items-center gap-3 px-5 py-2 rounded-lg text-[14px] font-medium transition-all duration-300 whitespace-nowrap ${
         active ? 'bg-white text-black shadow-2xl scale-105 ring-1 ring-black/5' : 'text-white/60 hover:text-white'
       }`}
     >
@@ -45,7 +45,6 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
     { label: 'Home',                      icon: <Home size={18}/>,         path: '/overview' },
     { label: 'My Portfolio & Allocation', icon: <Layers size={18}/>,       path: '/my-port' },
     { label: 'Simulate Portfolio',        icon: <ShoppingCart size={18}/>, path: '/simulate' },
-    // { label: 'Transaction Logs',          icon: <History size={18}/>,      path: '/transaction' },
   ];
 
   return (
@@ -53,17 +52,17 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
       <header className="h-17.5 md:h-22.5 px-3 md:px-4 lg:px-8 flex items-center justify-between shrink-0 gap-2 relative z-100">
         
         {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+        <div className="flex items-center gap-2 md:gap-1 shrink-0">
           <Link href="/overview">
             <div className="cursor-pointer transition-transform hover:scale-110">
-              <img src="picture/logo.png" alt="Logo" className="w-10 h-10 md:w-14 md:h-14"/>
+              <img src="picture/logo.png" alt="Logo" className="w-10 h-10 md:w-13 md:h-13"/>
             </div>
           </Link>
-          <span className="text-base md:text-xl font-medium tracking-tight hidden lg:inline">Portfolio Visualizer</span>
+          <span className="text-base md:text-[18px] font-semibold tracking-tight hidden lg:inline">Portfolio Visualizer</span>
         </div>
 
         {/* Desktop Nav */}
-        <nav className="cursor-pointer hidden xl:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl gap-1 xl:gap-3">
+        <nav className="cursor-pointer hidden lg:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl gap-1 lg:gap-3">
           {navItems.map(item => (
             <NavItem
               key={item.path}
@@ -78,7 +77,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
         {/* Right side */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Profile */}
-          <div className="cursor-pointer hidden xl:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl">
+          <div className="cursor-pointer hidden lg:flex items-center bg-black p-1 rounded-[10px] border border-white/10 shadow-2xl">
             <Link href="/profile">
               <div className={`flex items-center gap-2 md:gap-3 px-1.5 md:px-2 py-1 rounded-lg transition-all duration-300 ${
                 pathname === '/profile' ? 'bg-white text-black shadow-2xl scale-105 ring-1 ring-black/5' : 'text-white/60 hover:text-white'
@@ -97,7 +96,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="xl:hidden bg-black  rounded-[10px] p-2.5 text-white hover:bg-white/10 transition-all"
+            className="cursor-pointer lg:hidden bg-black  rounded-[10px] p-2.5 text-white hover:bg-white/10 transition-all"
           >
             {menuOpen ? <X size={20}/> : <Menu size={20}/>}
           </button>
@@ -106,7 +105,7 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="xl:hidden absolute top-17.5 left-0 right-0 z-99 bg-black border-b border-white/10 shadow-2xl px-4 py-3 flex flex-col gap-1">
+        <div className="lg:hidden absolute top-17.5 left-0 right-0 z-99 bg-black border-b border-white/10 shadow-2xl px-4 py-3 flex flex-col gap-1">
           {navItems.map(item => (
             <NavItem
               key={item.path}

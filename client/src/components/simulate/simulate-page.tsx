@@ -179,7 +179,7 @@ export const SimulateView = () => {
           {/* LEFT SIDEBAR: CONFIGURATION */}
           <aside className={`w-full md:w-80 flex-col border border-slate-200 bg-white rounded-2xl shadow-sm shrink-0 overflow-hidden ${mobileView === "result" ? "hidden md:flex" : "flex"}`}>
             <div className="p-6 border-b border-slate-200 bg-slate-50/50">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
                  AI Optimizer
               </h2>
               <p className="text-xs text-slate-500 mt-1 font-medium">

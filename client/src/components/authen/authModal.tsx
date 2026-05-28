@@ -176,7 +176,7 @@ export default function AuthModal() {
               size={14}
               className="group-hover:-translate-x-1 transition-transform"
             />
-            ย้อนกลับไปหน้าแรก
+            BACK TO HOME
           </div>
           </Link>
           <div className="mb-8">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { API_URL } from "@/src/config";
 import {
   Plus,
   Loader2,
@@ -57,7 +58,7 @@ export const Myport = () => {
       const token =
         typeof window !== "undefined" ? localStorage.getItem("token") : null;
       if (!token) return;
-      const res = await axios.get("http://localhost:7000/portfolio/me", {
+      const res = await axios.get(`${API_URL}/portfolio/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = res.data?.portfolio || res.data;
@@ -78,7 +79,7 @@ export const Myport = () => {
     try {
       setIsAllocLoading(true);
       const res = await axios.get(
-        `http://localhost:7000/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
+        `${API_URL}/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -106,7 +107,6 @@ export const Myport = () => {
   const confirmDelete = async () => {
     if (!portfolioToDelete) return;
 
-    const API_URL = "http://localhost:7000";
     const endpoint = `${API_URL}/portfolio/${portfolioToDelete.id}`;
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -140,7 +140,7 @@ export const Myport = () => {
       setIsLoadingAnalytics(true);
       const end = new Date().toISOString().split("T")[0];
       const res = await axios.get(
-        `http://localhost:7000/backtest/report/${id}?start=2020-01-01&end=${end}&initialCapital=10000`,
+        `${API_URL}/backtest/report/${id}?start=2020-01-01&end=${end}&initialCapital=10000`,
       );
       if (res.data?.success) {
         setAnalytics(res.data.data);

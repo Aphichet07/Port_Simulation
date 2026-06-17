@@ -8,6 +8,7 @@ import { OrderModule } from "./modules/order";
 import { PortfolioModule } from "./modules/portfolio";
 import { BacktestModule } from "./modules/backtest";
 import { AlgoModule } from "./modules/algo";
+import { GuardianModule } from "./modules/guardian";
 
 const app = new Elysia()
     .use(setup)
@@ -18,6 +19,7 @@ const app = new Elysia()
     .use(PortfolioModule)
     .use(BacktestModule)
     .use(AlgoModule)
+    .use(GuardianModule)
     .use(cors())
     .get('/', () => {
         return "Quant Terminal API is online!"; 

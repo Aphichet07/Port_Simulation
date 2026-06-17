@@ -3,6 +3,7 @@ import { Bot, X, Loader2, SendHorizontal } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { AI_API_URL, API_URL } from "@/src/config";
 
 interface Message {
   id: number;
@@ -14,6 +15,7 @@ function BonkChatWidget() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: "ยินดีต้อนรับ! มีอะไรให้เราช่วยไหมคะ?", sender: "bot" },
   ]);
@@ -23,6 +25,25 @@ function BonkChatWidget() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) return;
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch user in chat:", e);
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -44,12 +65,12 @@ function BonkChatWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/ai/chat", {
+      const response = await fetch(`${AI_API_URL}/ai/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: 1,
-          username: "JohnDoe",
+          userId: user?.id || 0,
+          username: user?.name || "Guest",
           message: currentMessage,
         }),
       });
@@ -112,7 +133,6 @@ function BonkChatWidget() {
           <div className="flex items-center gap-2">
             <Bot size={24} />
             <span>Bonk Bot</span>
-            
           </div>
           <button
             onClick={() => setIsOpen(false)}
@@ -122,7 +142,6 @@ function BonkChatWidget() {
             <X size={20} className="text-white " />
           </button>
         </div>
-        
 
         {/* พื้นที่ข้อความ */}
         <div className="flex-1 p-4 bg-gray-50 overflow-y-auto flex flex-col gap-4 scroll-smooth">

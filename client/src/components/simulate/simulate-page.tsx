@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { API_URL, AI_API_URL } from "@/src/config";
 import {
   BarChart,
   Bar,
@@ -46,7 +47,7 @@ export const SimulateView = () => {
         const token =
           typeof window !== "undefined" ? localStorage.getItem("token") : null;
         if (!token) return;
-        const res = await axios.get("http://localhost:7000/portfolio/me", {
+        const res = await axios.get(`${API_URL}/portfolio/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = res.data?.portfolio || res.data;
@@ -69,7 +70,7 @@ export const SimulateView = () => {
     try {
       setIsAllocLoading(true);
       const res = await axios.get(
-        `http://localhost:7000/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
+        `${API_URL}/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -120,7 +121,7 @@ export const SimulateView = () => {
       setOptResult(null);
       setMobileView("result");
 
-      const res = await axios.post("http://127.0.0.1:8000/optimize", payload);
+      const res = await axios.post(`${AI_API_URL}/optimize`, payload);
 
       // 🛠️ ปรับการเข้าถึงข้อมูลตาม JSON Structure ใหม่ (res.data.data)
       if (res.data?.status === "success") {

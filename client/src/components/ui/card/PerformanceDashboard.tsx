@@ -5,6 +5,8 @@ import axios from "axios";
 import PnLSummaryCard from "./PnLSummaryCard";
 import EquityCurveCard from "./EquityCurveCard";
 
+import { API_URL } from "@/src/config";
+
 const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
   const [backtestData, setBacktestData] = useState<any>(null);
   const [timeframe, setTimeframe] = useState("1M");
@@ -24,7 +26,7 @@ const PortfolioDashboard = ({ portfolioId }: { portfolioId: number }) => {
           .split("T")[0];
 
         const res = await axios.get(
-          `http://localhost:7000/backtest/report/${portfolioId}?start=${start}&end=${end}&initialCapital=100000`,
+          `${API_URL}/backtest/report/${portfolioId}?start=${start}&end=${end}&initialCapital=100000`,
         );
 
         if (res.data.success) {

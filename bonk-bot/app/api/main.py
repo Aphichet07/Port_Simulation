@@ -14,4 +14,4 @@ app.include_router(chat.router, prefix='/ai/chat', tags=['Chat System'])
 
 @app.get('/')
 def read_root():
-    return {"message": "Hello"}
+    return {"message": "Bonk Bot is Live ⚡️"}

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { API_URL } from "@/src/config";
 import Cookies from "js-cookie";
 import {
   Mail,
@@ -61,7 +62,7 @@ export const RegisterPage = ({ onLogin }: { onLogin: () => void }) => {
     const payload = { email, password, username };
 
     try {
-      const res = await axios.post(`http://localhost:7000${endpoint}`, payload);
+      const res = await axios.post(`${API_URL}${endpoint}`, payload);
       const data = res.data;
 
       setMessage({

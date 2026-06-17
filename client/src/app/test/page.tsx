@@ -1,6 +1,7 @@
 "use client"; 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "@/src/config";
 import BonkChatWidget from "@/src/components/ui/bonk";
 import BacktestResult from "@/src/components/ui/backtest";
 
@@ -15,7 +16,7 @@ export default function TestPage() {
       
       try {
         setIsLoading(true);
-        const response = await axios.get(`http://localhost:7000/backtest/report/${id}`);
+        const response = await axios.get(`${API_URL}/backtest/report/${id}`);
         setReportData(response.data);
       } catch (err: any) {
         console.error("Error fetching backtest report:", err);

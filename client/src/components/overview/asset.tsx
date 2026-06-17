@@ -190,40 +190,9 @@ export const AssetPerformanceTable: React.FC<AssetPerformanceTableProps> = ({
                 </td>
               </tr>
             ))}
-          </div>
-        </>
-      )}
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-
-  {/* Table */}
-  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-    <table className="w-full text-left">
-      <thead className="sticky top-0 bg-white z-10">
-        <tr className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-          <th className="pb-3 md:pb-4 w-[40%]">Asset Class</th>
-          <th className="pb-3 md:pb-4 text-center w-[20%]">1Y</th>
-          <th className="pb-3 md:pb-4 text-center w-[20%]">3Y</th>
-          <th className="pb-3 md:pb-4 text-center w-[20%]">5Y</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-50">
-        {MOCK_ASSETS_DATA.map((asset) => (
-          <tr key={asset.id} onClick={() => setSelectedAssetId(asset.id)}
-            className={`cursor-pointer transition-all duration-200 ${selectedAssetId === asset.id ? 'bg-slate-100/80 shadow-inner' : 'hover:bg-slate-50'}`}>
-            <td className="py-3 md:py-5">
-              <p className={`text-[10px] md:text-[11px] font-bold tracking-widest uppercase transition-colors ${selectedAssetId === asset.id ? 'text-black' : 'text-slate-500'}`}>
-                {asset.name}
-              </p>
-            </td>
-            <td className="py-3 md:py-5 text-center"><Badge val={asset.y1} status={asset.status} index={0} /></td>
-            <td className="py-3 md:py-5 text-center"><Badge val={asset.y3} status={asset.status} index={1} /></td>
-            <td className="py-3 md:py-5 text-center"><Badge val={asset.y5} status={asset.status} index={2} /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
   );
 };

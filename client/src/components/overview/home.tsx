@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Bot, RefreshCcw } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 import { AppHeader } from "./header";
 import { AssetPerformanceTable } from "./asset";
@@ -12,7 +14,24 @@ import MarketOverviewWidget from "@/src/components/ui/card/marketWidget";
 import TotalWealthChart from "@/src/components/ui/card/totalWealth";
 
 const HomePage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeTab] = useState("Home");
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      localStorage.setItem("token", token);
+      Cookies.set("token", token, { expires: 1, path: "/" });
+      
+      // Clean query parameter from URL
+      const params = new URLSearchParams(window.location.search);
+      params.delete("token");
+      const cleanSearch = params.toString();
+      const newUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : "");
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [searchParams]);
 
   const [selectedAssetId, setSelectedAssetId] = useState<number | null>(null);
 

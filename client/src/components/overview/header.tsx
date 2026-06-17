@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, Layers, ShoppingCart, History, User, Menu, X, Bot,
   TrendingUp, RefreshCcw, Cpu, Zap, ShieldCheck, Trash2, Save, Plus
@@ -8,6 +8,8 @@ import {
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import axios from 'axios';
+import { API_URL } from '@/src/config';
 
 const NavItem = ({ label, icon, active, onClick, href }: { 
   label: string; 
@@ -35,16 +37,46 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   const navigate = (href: string) => {
     router.push(href);
     setMenuOpen(false);
   };
 
+  const fetchProfile = async () => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setUser(null);
+        return;
+      }
+      const res = await axios.get(`${API_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to fetch user in header:", err);
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("balanceUpdate", fetchProfile);
+      return () => {
+        window.removeEventListener("balanceUpdate", fetchProfile);
+      };
+    }
+  }, []);
+
   const navItems = [
     { label: 'Home',                      icon: <Home size={18}/>,         path: '/overview' },
     { label: 'My Portfolio & Allocation', icon: <Layers size={18}/>,       path: '/my-port' },
     { label: 'Simulate Portfolio',        icon: <ShoppingCart size={18}/>, path: '/simulate' },
+    { label: 'Office & Guardian',         icon: <Bot size={18}/>,          path: '/office' },
   ];
 
   return (
@@ -83,11 +115,19 @@ export const AppHeader = ({ setActiveTab = () => {} }) => {
                 pathname === '/profile' ? 'bg-white text-black shadow-2xl scale-105 ring-1 ring-black/5' : 'text-white/60 hover:text-white'
               }`}>
                 <div className="w-8 h-8 md:w-11 md:h-11 rounded-full bg-black flex items-center justify-center overflow-hidden border-2 border-white/10 hover:ring-4 hover:ring-white/20 transition-all">
-                  <User size={20} className="text-white" />
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <User size={20} className="text-white" />
+                  )}
                 </div>
                 <div className="text-left hidden md:block">
-                  <p className="text-sm font-medium leading-none mb-1 tracking-tight">Apichet Runbor</p>
-                  <p className="text-[11px] tracking-tighter font-bold">Total Amount : 4,000 $</p>
+                  <p className="text-sm font-medium leading-none mb-1 tracking-tight">
+                    {user?.name || "Sign In"}
+                  </p>
+                  <p className="text-[11px] tracking-tighter font-bold">
+                    {user ? `Total Amount : ${parseFloat(user.balance).toLocaleString()} $` : "เข้าสู่ระบบเพื่อเริ่มใช้งาน"}
+                  </p>
                 </div>
               </div>
             </Link>

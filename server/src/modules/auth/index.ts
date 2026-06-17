@@ -88,7 +88,8 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
         google_code_verifier.remove();
 
         const token = await jwt.sign({ userId: user.id });
-        return redirect(`http://localhost:3000/overview?token=${token}`);
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+        return redirect(`${frontendUrl}/overview?token=${token}`);
       } catch (error) {
         const err = error as Error;
         set.status = 500;
@@ -188,4 +189,80 @@ export const AuthModule = new Elysia({ prefix: "/auth" })
         summary: "เข้าสู่ระบบ",
       },
     },
+  )
+  .get(
+    "/me",
+    async ({ headers: { authorization }, jwt, set }) => {
+      if (!authorization?.startsWith("Bearer ")) {
+        set.status = 401;
+        return { error: "Unauthorized" };
+      }
+      const token = authorization.slice(7);
+      const payload = await jwt.verify(token);
+      if (!payload || !payload.userId) {
+        set.status = 401;
+        return { error: "Unauthorized" };
+      }
+      const user = await AuthService.getUserById(payload.userId as number);
+      if (!user) {
+        set.status = 404;
+        return { error: "User not found" };
+      }
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        balance: user.balance,
+        risk: user.risk,
+        currency: user.currency,
+      };
+    },
+    {
+      detail: {
+        tags: ["Auth"],
+        summary: "ดึงข้อมูลโปรไฟล์ผู้ใช้ปัจจุบัน",
+      },
+    }
+  )
+  .put(
+    "/me",
+    async ({ headers: { authorization }, jwt, body, set }) => {
+      if (!authorization?.startsWith("Bearer ")) {
+        set.status = 401;
+        return { error: "Unauthorized" };
+      }
+      const token = authorization.slice(7);
+      const payload = await jwt.verify(token);
+      if (!payload || !payload.userId) {
+        set.status = 401;
+        return { error: "Unauthorized" };
+      }
+      const updatedUser = await AuthService.updateUserProfile(payload.userId as number, body);
+      if (!updatedUser) {
+        set.status = 404;
+        return { error: "User not found" };
+      }
+      return {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        avatarUrl: updatedUser.avatarUrl,
+        balance: updatedUser.balance,
+        risk: updatedUser.risk,
+        currency: updatedUser.currency,
+      };
+    },
+    {
+      body: t.Object({
+        name: t.Optional(t.String()),
+        balance: t.Optional(t.Union([t.Number(), t.String()])),
+        risk: t.Optional(t.String()),
+        currency: t.Optional(t.String()),
+      }),
+      detail: {
+        tags: ["Auth"],
+        summary: "อัปเดตข้อมูลการตั้งค่าโปรไฟล์ผู้ใช้",
+      },
+    }
   );

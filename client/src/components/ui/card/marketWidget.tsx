@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "@/src/config";
 import { TrendingUp, TrendingDown, Loader2, AlertCircle } from "lucide-react";
 
 interface MarketData {
@@ -23,7 +24,7 @@ const MarketOverviewWidget = () => {
         setIsLoading(true);
         setError(null);
         const response = await axios.get(
-          "http://localhost:7000/market/overview",
+          `${API_URL}/market/overview`,
         );
 
         if (response.data && response.data.success) {

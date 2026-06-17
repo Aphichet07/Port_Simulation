@@ -24,3 +24,14 @@ node_modules/
 backtest-service/venv/
 python-grpc/venv/
 ai-service/venv/
+
+# Secrets & Environment Configurations
+.env
+.env.local
+.env.*
+!.env.example
+**/.env
+**/.env.local
+**/.env.*
+!**/.env.example
+

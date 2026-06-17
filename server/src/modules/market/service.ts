@@ -101,8 +101,8 @@ export const MarketService = {
 
       const data = (await response.json()) as any;
       console.log(data);
-      if (data.c === 0 && data.d === null) {
-        throw new Error("ไม่พบข้อมูลหุ้นสัญลักษณ์นี้");
+      if (data.error || (data.c === undefined && data.d === undefined) || (data.c === 0 && data.d === null)) {
+        throw new Error(data.error || "ไม่พบข้อมูลหุ้นสัญลักษณ์นี้ หรือเซิร์ฟเวอร์ปฏิเสธการร้องขอ");
       }
 
       const result = {

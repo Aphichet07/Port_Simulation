@@ -14,6 +14,7 @@ import {
 import { Wallet, ChevronDown, Loader2, AlertCircle } from "lucide-react";
 import AssetAllocationChart from "@/src/components/ui/card/AssetAllocationChart";
 import PortfolioDashboard from "@/src/components/ui/card/PerformanceDashboard";
+import { API_URL } from "@/src/config";
 
 interface BacktestReport {
   dates: string[];
@@ -49,7 +50,7 @@ const TotalWealthChart = () => {
         const token =
           typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-        const res = await axios.get("http://localhost:7000/portfolio/me", {
+        const res = await axios.get(`${API_URL}/portfolio/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -85,7 +86,7 @@ const TotalWealthChart = () => {
           .split("T")[0];
 
         const response = await axios.get(
-          `http://localhost:7000/backtest/report/${selectedPortId}?start=${start}&end=${end}&initialCapital=100000`,
+          `${API_URL}/backtest/report/${selectedPortId}?start=${start}&end=${end}&initialCapital=100000`,
         );
 
         if (response.data.success) {
@@ -115,7 +116,7 @@ const TotalWealthChart = () => {
       try {
         setIsAllocLoading(true);
         const res = await axios.get(
-          `http://localhost:7000/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
+          `${API_URL}/portfolio/inform/${encodeURIComponent(activePort.port_name)}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

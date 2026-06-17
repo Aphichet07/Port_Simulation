@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import { API_URL } from "@/src/config";
 import {
   Trash2,
   Save,
@@ -50,7 +51,7 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
 
     const fetchAssets = async () => {
       try {
-        const res = await axios.get("http://localhost:7000/market/asset");
+        const res = await axios.get(`${API_URL}/market/asset`);
         const assetsData = Array.isArray(res.data)
           ? res.data
           : res.data?.data || [];
@@ -150,7 +151,7 @@ export const AssetForm = ({ onClose }: AssetFormProps) => {
       }
       
       const res = await axios.post(
-        `http://localhost:7000${endpoint}`,
+        `${API_URL}${endpoint}`,
         payload,
         {
           headers: {

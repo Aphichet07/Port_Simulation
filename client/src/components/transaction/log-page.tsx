@@ -35,7 +35,7 @@ const TransactionLogsView = () => {
       <AppHeader />
 
       <div className="flex-1 overflow-hidden px-3 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
-        <CreatePortfolioForm/>
+        <CreatePortfolioForm onClose={() => {}}/>
       </div>
 
       {/* Floating Bot */}

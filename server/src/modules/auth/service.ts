@@ -121,6 +121,30 @@ export const AuthService = {
     }
 
     return existingUser;
+  },
+  
+  async getUserById(id: number) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    return user;
+  },
+
+  async updateUserProfile(id: number, data: { name?: string; balance?: number | string; risk?: string; currency?: string }) {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.balance !== undefined) updateData.balance = String(data.balance);
+    if (data.risk !== undefined) updateData.risk = data.risk;
+    if (data.currency !== undefined) updateData.currency = data.currency;
+
+    const [updatedUser] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
   }
 };
 

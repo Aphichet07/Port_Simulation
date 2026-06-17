@@ -26,7 +26,7 @@ export interface Trade {
 
 const docker = new Docker();
 const BOT_IMAGE = "trading-bot";
-const BACKTEST_URL = process.env.BACKTEST_SERVICE_URL || "http://localhost:8001";
+const BACKTEST_URL = process.env.BACKTEST_SERVICE_URL || "http://127.0.0.1:8001";
 
 const bots = new Map<string, BotContainer>();
 const trades = new Map<string, Trade[]>();

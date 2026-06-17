@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from "react";
 import axios from "axios";
 import OptimizationResult from "@/src/components/ui/result";
+import { AI_API_URL } from "@/src/config";
 import { Settings, Play, X, Plus, PieChart } from "lucide-react";
 
 interface PortfolioItem {
@@ -87,7 +88,7 @@ export default function PortFolioForm() {
     };
 
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/optimize`, payload);
+      const res = await axios.post(`${AI_API_URL}/optimize`, payload);
       setData(res.data);
     } catch (error: any) {
       console.error(error.message);
